@@ -136,7 +136,7 @@ std::shared_ptr<Data> readInput(const char* path) {
 	std::ifstream file;
 	file.open(path, std::ios::in);
 	if (!file.is_open()) {
-		std::cerr << "Die Datei konnte nicht geöffnet werden '" << path << "'.\n"
+		std::cerr << "Die Datei konnte nicht geoeffnet werden '" << path << "'.\n"
 			<< "Du befindest dich momentan im Pfad " << std::filesystem::current_path() << std::endl;
 		file.close();
 		return nullptr;
@@ -294,7 +294,7 @@ std::shared_ptr<Data> readInput(const char* path) {
 void printResult(int score, const std::vector<std::pair<int, int>>& path) {
 	std::cout << std::to_string(score) << ": ";
 	for (const auto& [p, w] : path) {
-		std::cout << '(' << p << ';' << w << ") ";
+		std::cout << '(' << p << ';' << w << ';' << p << '/' << w << ") ";
 	}
 	std::cout << std::endl;
 }
@@ -302,7 +302,7 @@ void printResult(int score, const std::vector<std::pair<int, int>>& path) {
 typedef std::vector<std::pair<int, int>> Path;
 typedef std::unordered_map<int, std::vector<Path>> Results;
 
-void recurse(const Data& data, uint32_t pFlags, uint32_t wFlags, Path& path, int score, Results& results) {
+void recurse(const Data& data, uint32_t pFlags, uint32_t wFlags, Path& path, int score, Results& results, int (*valueFunc)(int, int)) {
 	if (pFlags == 0 || wFlags == 0) {
 		auto it = results.find(score);
 		if (it == results.end()) {
@@ -325,10 +325,12 @@ void recurse(const Data& data, uint32_t pFlags, uint32_t wFlags, Path& path, int
 
 			found = true;
 
-			int value = pref.personPoints * pref.wgPoints;
+			int pp = pref.personPoints;
+			int wp = pref.wgPoints;
+			int value = valueFunc(pp, wp);
 
 			path.emplace_back(i, j);
-			recurse(data, pFlags & ~(1 << i), wFlags & ~(1 << j), path, score + value, results);
+			recurse(data, pFlags & ~(1 << i), wFlags & ~(1 << j), path, score + 10 + value, results, valueFunc);
 			path.pop_back();
 		}
 	}
@@ -343,7 +345,7 @@ void recurse(const Data& data, uint32_t pFlags, uint32_t wFlags, Path& path, int
 	}
 }
 
-void solve(const Data& data) {
+void solve(const Data& data, int(*valueFunc)(int, int)) {
 	uint32_t pFlags = 0;
 	uint32_t wFlags = 0;
 	for (int i = 0; i < data.idxPerson.size(); ++i) {
@@ -357,7 +359,7 @@ void solve(const Data& data) {
 	auto path = Path();
 	auto results = Results();
 
-	recurse(data, pFlags, wFlags, path, 0, results);
+	recurse(data, pFlags, wFlags, path, 0, results, valueFunc);
 
 	auto maxScore = -1;
 	for (auto it = results.begin(); it != results.end(); ++it) {
@@ -367,16 +369,18 @@ void solve(const Data& data) {
 	}
 
 	if (maxScore == -1) {
-		std::cerr << "Es gab keine mögliche Kombination" << std::endl;
+		std::cerr << "Es gab keine moegliche Kombination" << std::endl;
 		return;
 	}
 
 	auto bestPaths = results[maxScore];
 	std::cout << std::endl;
-	std::cout << "Score: " << maxScore << std::endl << std::endl;
+	std::cout << "Score: " << maxScore << std::endl;
 	for (const auto& p : bestPaths) {
 		for (const auto& [per, wg] : p) {
-			std::cout << '(' << data.idxPerson[per] << ';' << data.idxWg[wg] << ") ";
+			int pp = data.values[per][wg].personPoints;
+			int wp = data.values[per][wg].wgPoints;
+			std::cout << '(' << data.idxPerson[per] << ';' << data.idxWg[wg] << ';' << pp << '/' << wp << ") ";
 		}
 		std::cout << std::endl;
 	}
@@ -389,5 +393,12 @@ int main(int argc, char** argv) {
 	}
 
 	auto input = readInput(argv[1]);
-	solve(*input);
+
+	if (input == nullptr) return -2;
+
+	solve(*input, [](int a, int b) { return a + b; });
+	solve(*input, [](int a, int b) { return a * b; });
+	solve(*input, [](int a, int b) { return a * b * std::max(a, b) / (std::min(a, b) * 2); });
+
+	return 0;
 }
