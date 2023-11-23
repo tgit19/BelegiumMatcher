@@ -5,19 +5,22 @@
 #include <unordered_map>
 #include <memory>
 
-typedef unsigned int uint;
+#include "Hungarian.h"
 
-using Matrix = std::vector<std::vector<int>>;
+typedef unsigned int uint;
 
 struct PrefPair {
 	int wgPoints;
 	int personPoints;
 };
 
+typedef std::vector<std::vector<int>> IntMatrix;
+typedef std::vector<std::vector<PrefPair>> PairMatrix;
+
 struct Data {
 	std::unordered_map<std::string, int> personIdx, wgIdx;
 	std::vector<std::string> idxPerson, idxWg;
-	std::vector<std::vector<PrefPair>> values;
+	PairMatrix values;
 };
 
 std::string trim(std::string s) {
@@ -330,7 +333,7 @@ void recurse(const Data& data, uint32_t pFlags, uint32_t wFlags, Path& path, int
 			int value = valueFunc(pp, wp);
 
 			path.emplace_back(i, j);
-			recurse(data, pFlags & ~(1 << i), wFlags & ~(1 << j), path, score + 10 + value, results, valueFunc);
+			recurse(data, pFlags & ~(1 << i), wFlags & ~(1 << j), path, score + value, results, valueFunc);
 			path.pop_back();
 		}
 	}
@@ -343,6 +346,36 @@ void recurse(const Data& data, uint32_t pFlags, uint32_t wFlags, Path& path, int
 			results[score].push_back(path);
 		}
 	}
+}
+
+IntMatrix transformMatrix(const Data& d, int(*valueFunc)(int, int)) {
+	IntMatrix m = std::vector<std::vector<int>>(d.values.size(), std::vector<int>(d.values[0].size(), 0));
+	for (int i = 0; i < m.size(); ++i) {
+		for (int j = 0; j < m[0].size(); ++j) {
+			m[i][j] = valueFunc(d.values[i][j].personPoints, d.values[i][j].wgPoints);
+		}
+	}
+	return m;
+}
+
+void solveHungarian(Data d, int(*valueFunc)(int, int)) {
+	Hungarian h;
+
+	for (auto& row : d.values) {
+		for (auto& p : row) {
+			if (p.personPoints == 0 || p.wgPoints == 0) {
+				p.personPoints = 0;
+				p.wgPoints = 0;
+			} else if (p.personPoints == 15 && p.wgPoints == 15) {
+				p.personPoints = 30;
+				p.wgPoints = 30;
+			}
+		}
+	}
+	
+	auto matrix = transformMatrix(d, valueFunc);
+	auto result = h.solveMax(matrix);
+	std::cout << result << std::endl;
 }
 
 void solve(const Data& data, int(*valueFunc)(int, int)) {
@@ -397,8 +430,10 @@ int main(int argc, char** argv) {
 	if (input == nullptr) return -2;
 
 	solve(*input, [](int a, int b) { return a + b; });
-	solve(*input, [](int a, int b) { return a * b; });
-	solve(*input, [](int a, int b) { return a * b * std::max(a, b) / (std::min(a, b) * 2); });
+	//solve(*input, [](int a, int b) { return a * b; });
+	//solve(*input, [](int a, int b) { return a * b * std::max(a, b) / (std::min(a, b) * 2); });
+
+	solveHungarian(*input, [](int a, int b) { return a + b; });
 
 	return 0;
 }
