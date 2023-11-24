@@ -289,7 +289,7 @@ Hungarian::Result Hungarian::solveMax(const MatI& original) {
 	bool done = false;
 	step = 1;
 	while (!done) {
-		std::cout << '\n' << matrix << "\n" << mask << "\n------------" << "\nStep: " << step << std::endl;
+		//std::cout << '\n' << matrix << "\n" << mask << "\n------------" << "\nStep: " << step << std::endl;
 		switch (step) {
 		case 1: step1(); break;
 		case 2: step2(); break;
@@ -303,7 +303,7 @@ Hungarian::Result Hungarian::solveMax(const MatI& original) {
 
 	mask.resize(original.size());
 	for (auto& row : mask) {
-		row.resize(mask[0].size());
+		row.resize(original[0].size());
 	}
 
 	Result result{};
@@ -316,7 +316,7 @@ Hungarian::Result Hungarian::solveMax(const MatI& original) {
 		}
 	}
 
-	std::cout << mask << '\n' << original << std::endl;
+	//std::cout << mask << '\n' << original << std::endl;
 
 	return result;
 }

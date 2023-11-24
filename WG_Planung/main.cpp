@@ -352,7 +352,9 @@ IntMatrix transformMatrix(const Data& d, int(*valueFunc)(int, int)) {
 	IntMatrix m = std::vector<std::vector<int>>(d.values.size(), std::vector<int>(d.values[0].size(), 0));
 	for (int i = 0; i < m.size(); ++i) {
 		for (int j = 0; j < m[0].size(); ++j) {
-			m[i][j] = valueFunc(d.values[i][j].personPoints, d.values[i][j].wgPoints);
+			auto pp = d.values[i][j].personPoints;
+			auto wp = d.values[i][j].wgPoints;
+			m[i][j] = valueFunc(pp, wp);
 		}
 	}
 	return m;
@@ -360,22 +362,19 @@ IntMatrix transformMatrix(const Data& d, int(*valueFunc)(int, int)) {
 
 void solveHungarian(Data d, int(*valueFunc)(int, int)) {
 	Hungarian h;
-
-	for (auto& row : d.values) {
-		for (auto& p : row) {
-			if (p.personPoints == 0 || p.wgPoints == 0) {
-				p.personPoints = 0;
-				p.wgPoints = 0;
-			} else if (p.personPoints == 15 && p.wgPoints == 15) {
-				p.personPoints = 30;
-				p.wgPoints = 30;
-			}
-		}
-	}
 	
 	auto matrix = transformMatrix(d, valueFunc);
 	auto result = h.solveMax(matrix);
 	std::cout << result << std::endl;
+
+	std::cout << "Cost: " << result.cost << std::endl;
+	for (const auto& [pi, wi] : result.assignements) {
+		auto person = d.idxPerson[pi];
+		auto wg = d.idxWg[wi];
+		auto value = d.values[pi][wi];
+		std::cout << '(' << person << ';' << wg << ';' << value.personPoints << '/' << value.wgPoints << ") ";
+	}
+	std::cout << std::endl;
 }
 
 void solve(const Data& data, int(*valueFunc)(int, int)) {
@@ -419,6 +418,26 @@ void solve(const Data& data, int(*valueFunc)(int, int)) {
 	}
 }
 
+void processExtrema(std::shared_ptr<Data> data) {
+	std::vector<int> removeP{};
+	std::vector<int> removeW{};
+	for (int i = 0; i < data->values.size(); ++i) {
+		for (int j = 0; j < data->values[0].size(); ++j) {
+			auto& pp = data->values[i][j].personPoints;
+			auto& wp = data->values[i][j].wgPoints;
+			if (pp == 0 || wp == 0) {
+				pp = 0;
+				wp = 0;
+			} else if (pp == 15 && wp == 15) {
+				removeP.emplace_back(i);
+				removeW.emplace_back(j);
+				std::cout << "Perfect match: " << data->idxPerson[i] << " - " << data->idxWg[i] << std::endl;
+			}
+		}
+	}
+	// TODO remove perfect matches
+}
+
 int main(int argc, char** argv) {
 	if (argc != 2) {
 		std::cout << "Usage: WG_Planung.exe [inputfile]" << std::endl;
@@ -429,11 +448,16 @@ int main(int argc, char** argv) {
 
 	if (input == nullptr) return -2;
 
+	processExtrema(input);
+
 	solve(*input, [](int a, int b) { return a + b; });
 	//solve(*input, [](int a, int b) { return a * b; });
 	//solve(*input, [](int a, int b) { return a * b * std::max(a, b) / (std::min(a, b) * 2); });
 
 	solveHungarian(*input, [](int a, int b) { return a + b; });
+	solveHungarian(*input, [](int a, int b) { return a * b; });
+	solveHungarian(*input, [](int a, int b) { return a + b - std::abs(a - b) / 2; });
+	//solveHungarian(*input, [](int a, int b) { return a * b * std::max(a, b) / (std::min(a, b) * 2); });
 
 	return 0;
 }
