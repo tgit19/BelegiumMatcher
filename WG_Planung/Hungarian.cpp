@@ -73,7 +73,7 @@ int Hungarian::findSmallestUncovered() {
 	return minVal;
 }
 
-int Hungarian::findMaxValue(const MatI& values) {
+int Hungarian::findMaxValue(const IntMatrix& values) {
 	int maxVal = 0;
 	for (const auto& row : values) {
 		for (const auto& val : row) {
@@ -83,9 +83,9 @@ int Hungarian::findMaxValue(const MatI& values) {
 	return maxVal;
 }
 
-Hungarian::MatI Hungarian::invertMatrix(const MatI& values) {
+IntMatrix Hungarian::invertMatrix(const IntMatrix& values) {
 	int maxVal = findMaxValue(values);
-	MatI m = values;
+	IntMatrix m = values;
 	for (auto& row : m) {
 		for (auto& val : row) {
 			val = maxVal - val;
@@ -219,7 +219,7 @@ void Hungarian::step6() {
 	step = 4;
 }
 
-Hungarian::Result Hungarian::solve(const MatI& original) {
+Hungarian::Result Hungarian::solve(const IntMatrix& original) {
 	if (original.empty() || original[0].empty()) {
 		std::cout << "Did not expect empty matrix." << std::endl;
 	}
@@ -229,15 +229,14 @@ Hungarian::Result Hungarian::solve(const MatI& original) {
 	for (auto& row : matrix) {
 		row.resize(size, 0);
 	}
-	matrix.resize(size, RowI(size, 0));
-	mask = std::vector<RowI>(size, RowI(size, 0));
-	rowCover = RowI(size, 0);
-	colCover = RowI(size, 0);
+	matrix.resize(size, IntVec(size, 0));
+	mask = IntMatrix(size, IntVec(size, 0));
+	rowCover = IntVec(size, 0);
+	colCover = IntVec(size, 0);
 
 	bool done = false;
 	step = 1;
 	while (!done) {
-		//std::cout << '\n' << matrix << "\n" << mask << "\n------------" << "\nStep: " << step << std::endl;
 		switch (step) {
 		case 1: step1(); break;
 		case 2: step2(); break;
@@ -267,29 +266,28 @@ Hungarian::Result Hungarian::solve(const MatI& original) {
 	return result;
 }
 
-Hungarian::Result Hungarian::solveMax(const MatI& original) {
+Hungarian::Result Hungarian::solveMax(const IntMatrix& original) {
 	if (original.empty() || original[0].empty()) {
 		std::cout << "Did not expect empty matrix." << std::endl;
 	}
 	
 	int maxValue = findMaxValue(original);
 
-	MatI inverted = invertMatrix(original);
+	IntMatrix inverted = invertMatrix(original);
 
 	matrix = inverted;
 	size = std::max(original.size(), original[0].size());
 	for (auto& row : matrix) {
 		row.resize(size, maxValue * 2);
 	}
-	matrix.resize(size, RowI(size, maxValue * 2));
-	mask = std::vector<RowI>(size, RowI(size, 0));
-	rowCover = RowI(size, 0);
-	colCover = RowI(size, 0);
+	matrix.resize(size, IntVec(size, maxValue * 2));
+	mask = IntMatrix(size, IntVec(size, 0));
+	rowCover = IntVec(size, 0);
+	colCover = IntVec(size, 0);
 
 	bool done = false;
 	step = 1;
 	while (!done) {
-		//std::cout << '\n' << matrix << "\n" << mask << "\n------------" << "\nStep: " << step << std::endl;
 		switch (step) {
 		case 1: step1(); break;
 		case 2: step2(); break;
@@ -321,7 +319,7 @@ Hungarian::Result Hungarian::solveMax(const MatI& original) {
 	return result;
 }
 
-std::ostream& operator<<(std::ostream& os, const Hungarian::MatI& m) {
+std::ostream& operator<<(std::ostream& os, const IntMatrix& m) {
 	for (const auto& row : m) {
 		for (const auto& val : row) {
 			os << val << "  ";

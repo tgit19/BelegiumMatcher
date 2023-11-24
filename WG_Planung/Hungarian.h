@@ -1,13 +1,10 @@
 #ifndef HUNGARIAN_H
 #define HUNGARIAN_H
 
-#include <iostream>
-#include <vector>
+#include "Utils.h"
 
 class Hungarian {
 public:
-	typedef std::vector<int> RowI;
-	typedef std::vector<RowI> MatI;
 
 	struct Pos {
 		int row, col;
@@ -29,10 +26,10 @@ public:
 	};
 
 private:
-	MatI matrix;
-	MatI mask;
-	RowI rowCover;
-	RowI colCover;
+	IntMatrix matrix;
+	IntMatrix mask;
+	IntVec rowCover;
+	IntVec colCover;
 	int step;
 	int size;
 	int pathRow0, pathCol0;
@@ -45,8 +42,8 @@ private:
 	void augmentPath(const Path& path);
 	void clearPrimes();
 	int findSmallestUncovered();
-	int findMaxValue(const MatI& values);
-	MatI invertMatrix(const MatI& values);
+	int findMaxValue(const IntMatrix& values);
+	IntMatrix invertMatrix(const IntMatrix& values);
 
 private:
 	void step1();
@@ -57,12 +54,12 @@ private:
 	void step6();
 
 public:
-	Result solve(const MatI& original);
-	Result solveMax(const MatI& original);
+	Result solve(const IntMatrix& original);
+	Result solveMax(const IntMatrix& original);
 
 };
 
-std::ostream& operator<<(std::ostream& os, const Hungarian::MatI& m);
+std::ostream& operator<<(std::ostream& os, const IntMatrix& m);
 std::ostream& operator<<(std::ostream& os, const Hungarian::Result& r);
 
 #endif

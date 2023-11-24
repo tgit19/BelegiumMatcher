@@ -83,10 +83,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Hungarian.cpp" />
+    <ClCompile Include="InputReader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Hungarian.h" />
+    <ClInclude Include="InputReader.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
