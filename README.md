@@ -7,7 +7,7 @@ The program uses the Hungarian Algorithm which always finds the optimal solution
 
     |         | Person1 | Person2 | Person3 |
     | -------:|:-------:|:-------:|:-------:|
-    | WG1     | 6       | 12      | 18      |
+    | WG1     | 6       | 12      | 8      |
     | WG2     | 8       | 13      | 7       |
     | WG3     | 10      | 15      | 12      |
     |         |         |         |         |
