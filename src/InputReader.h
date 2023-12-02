@@ -17,6 +17,9 @@ struct Data {
 	PairMatrix values;
 };
 
+/*
+Reads two tables from an csv-file (comma-separated)
+*/
 class InputReader {
 private:
 	std::unordered_map<std::string, int> personIdx;

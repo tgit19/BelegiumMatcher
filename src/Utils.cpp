@@ -12,15 +12,12 @@ std::string trim(std::string s) {
 	return s;
 }
 
-/*
-Splits the string at the delimiter and returns a vector of trimmed strings.
-*/
 std::vector<std::string> split(std::string const& s, char delim) {
 	if (trim(s).empty()) {
 		return std::vector<std::string>();
 	}
 
-	auto lastDelim = 0;
+	size_t lastDelim = 0;
 	std::vector<std::string> parts;
 	while (true) {
 		auto curDelim = s.find(delim, lastDelim);

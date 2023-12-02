@@ -3,6 +3,10 @@
 
 #include "Utils.h"
 
+/*
+Implementation of the Hungarian Algorithm
+Slightly modified version of https://brc2.com/the-algorithm-workshop/
+*/
 class Hungarian {
 public:
 
@@ -54,7 +58,7 @@ private:
 	void step6();
 
 public:
-	Result solve(const IntMatrix& original);
+	Result solveMin(const IntMatrix& original);
 	Result solveMax(const IntMatrix& original);
 
 };

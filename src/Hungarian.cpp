@@ -219,13 +219,13 @@ void Hungarian::step6() {
 	step = 4;
 }
 
-Hungarian::Result Hungarian::solve(const IntMatrix& original) {
+Hungarian::Result Hungarian::solveMin(const IntMatrix& original) {
 	if (original.empty() || original[0].empty()) {
 		std::cout << "Did not expect empty matrix." << std::endl;
 	}
 
 	matrix = original;
-	size = std::max(original.size(), original[0].size());
+	size = (int)std::max(original.size(), original[0].size());
 	for (auto& row : matrix) {
 		row.resize(size, 0);
 	}
@@ -276,7 +276,7 @@ Hungarian::Result Hungarian::solveMax(const IntMatrix& original) {
 	IntMatrix inverted = invertMatrix(original);
 
 	matrix = inverted;
-	size = std::max(original.size(), original[0].size());
+	size = (int)std::max(original.size(), original[0].size());
 	for (auto& row : matrix) {
 		row.resize(size, maxValue * 2);
 	}
@@ -313,8 +313,6 @@ Hungarian::Result Hungarian::solveMax(const IntMatrix& original) {
 			}
 		}
 	}
-
-	//std::cout << mask << '\n' << original << std::endl;
 
 	return result;
 }

@@ -37,27 +37,33 @@ void solveHungarian(Data d, int(*valueFunc)(int, int)) {
 	std::cout << std::endl;
 }
 
+/*
+Copies wg if there are multiple empty rooms
+*/
 void processRoomCounts(std::shared_ptr<Data> data) {
-	int realI = 0;
+	int j = 0;
 	for (int i = 0; i < data->values.size(); ++i) {
-		if (data->roomCounts[realI] > 1) {
-			data->idxWg.insert(data->idxWg.begin() + i + 1, data->idxWg[realI]);
-			data->values.insert(data->values.begin() + i + 1, data->values[realI]);
-			--data->roomCounts[realI];
+		if (data->roomCounts[j] > 1) {
+			data->idxWg.insert(data->idxWg.begin() + i + 1, data->idxWg[j]);
+			data->values.insert(data->values.begin() + i + 1, data->values[j]);
+			--data->roomCounts[j];
 		} else {
-			++realI;
+			++j;
 		}
 	}
 }
 
+/*
+Adjust values for vetos and perfect matches
+*/
 void processExtrema(std::shared_ptr<Data> data) {
 	for (int i = 0; i < data->values.size(); ++i) {
 		for (int j = 0; j < data->values[0].size(); ++j) {
 			auto& pp = data->values[i][j].personPoints;
 			auto& wp = data->values[i][j].wgPoints;
 			if (pp == 0 || wp == 0) {
-				pp = 0;
-				wp = 0;
+				pp = -100;
+				wp = -100;
 			} else if (pp == 15 && wp == 15) {
 				pp = 25;
 				wp = 25;
@@ -68,7 +74,7 @@ void processExtrema(std::shared_ptr<Data> data) {
 
 int main(int argc, char** argv) {
 	if (argc != 2) {
-		std::cout << "Usage: WG_Planung.exe [inputfile]" << std::endl;
+		std::cout << "Usage: Belegium_Matcher.exe [inputfile]" << std::endl;
 		return -1;
 	}
 
@@ -81,16 +87,18 @@ int main(int argc, char** argv) {
 	processExtrema(input);
 	processRoomCounts(input);
 
-	//solve(*input, [](int a, int b) { return a + b; });
-	//solve(*input, [](int a, int b) { return a * b; });
-	//solve(*input, [](int a, int b) { return a * b * std::max(a, b) / (std::min(a, b) * 2); });
-
 	std::cout << std::endl;
 
+	// solve with diffreren heuristics
+	std::cout << "Solution 1:" << std::endl;
 	solveHungarian(*input, [](int a, int b) { return a + b; });
-	solveHungarian(*input, [](int a, int b) { return a * b; });
-	solveHungarian(*input, [](int a, int b) { return a + b - std::abs(a - b) / 3; });
-	//solveHungarian(*input, [](int a, int b) { return a * b * std::max(a, b) / (std::min(a, b) * 2); });
+	std::cout << "Solution 2:" << std::endl;
+	solveHungarian(*input, [](int a, int b) { return ((a < 0 || b < 0) ? -1 : +1) * std::abs(a * b); }); // just a*b but fixed for negative numbers
+	std::cout << "Solution 3:" << std::endl;
+	solveHungarian(*input, [](int a, int b) { return a + b - std::abs(a - b) / 3; }); // small penalty for difference of values => 7/7 is better than 3/11
+
+	std::cout << "\n\nPress enter to exit" << std::endl;
+	std::cin.get();
 
 	return 0;
 }

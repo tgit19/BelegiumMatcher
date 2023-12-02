@@ -5,7 +5,7 @@ std::pair<StrMatrix, StrMatrix>* InputReader::readTables(std::ifstream& file) {
 
 	std::string line;
 	while (std::getline(file, line)) {
-		std::vector<std::string> entries = split(line, ';');
+		std::vector<std::string> entries = split(line, ',');
 		bool empty = true;
 		for (const auto& e : entries) {
 			if (!e.empty()) {
@@ -162,7 +162,7 @@ std::shared_ptr<Data> InputReader::readFile(const std::string& path) {
 
 	printTable(idxPerson, idxWg, values);
 
-	std::cout << "WGs mit mehreren Zimmern:" << std::endl;
+	std::cout << "WGs mit mehr als einem freien Zimmer (Lass den Namen der WG leer, wenn es keine weiteren mehr gibt):" << std::endl;
 	bool done = false;
 	std::vector<int> roomCounts(wgs.size(), 1);
 	while (!done) {
@@ -176,7 +176,7 @@ std::shared_ptr<Data> InputReader::readFile(const std::string& path) {
 
 		auto it = wgIdx.find(wgName);
 		if (it == wgIdx.end()) {
-			std::cout << "Es gibt keine WG names " << wgName << std::endl;
+			std::cout << "Es gibt keine WG namens " << wgName << std::endl;
 			continue;
 		}
 		std::cout << "Anzahl freier Zimmer:" << std::endl;
@@ -186,6 +186,7 @@ std::shared_ptr<Data> InputReader::readFile(const std::string& path) {
 		try {
 			roomNum = std::stoi(numStr);
 		} catch (const std::invalid_argument& e) {
+			(void)e; // just to get rid of the "unreferenced local" warning
 			std::cout << "Das ist keine Zahl" << std::endl;
 			continue;
 		}
