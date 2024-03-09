@@ -1,11 +1,27 @@
 #include "InputReader.h"
 
 std::pair<StrMatrix, StrMatrix>* InputReader::readTables(std::ifstream& file) {
-	std::vector<std::vector<std::string>> tables;
+	std::vector<std::vector<std::string>> tables{};
 
-	std::string line;
-	while (std::getline(file, line)) {
-		std::vector<std::string> entries = split(line, ',');
+	std::vector<std::string> lines{};
+
+	unsigned semicolon = 0;
+	unsigned comma = 0;
+
+	{
+		std::string line;
+		while (std::getline(file, line)) {
+			for (char c : line) {
+				if (c == ';') semicolon++;
+				else if (c == ',') comma++;
+			}
+			lines.emplace_back(line);
+		}
+	}
+
+	const char delimiter = (semicolon > comma) ? ';' : ',';
+	for (const auto& line : lines) {
+		std::vector<std::string> entries = split(line, delimiter);
 		bool empty = true;
 		for (const auto& e : entries) {
 			if (!e.empty()) {
@@ -18,6 +34,7 @@ std::pair<StrMatrix, StrMatrix>* InputReader::readTables(std::ifstream& file) {
 		}
 		tables.emplace_back(std::move(entries));
 	}
+
 
 	// remove empty lines before and after
 	tables.erase(
