@@ -56,7 +56,7 @@ void processRoomCounts(std::shared_ptr<Data> data) {
 /*
 Adjust values for vetos and perfect matches
 */
-void processExtrema(std::shared_ptr<Data> data) {
+void processExtrema(std::shared_ptr<Data> data, int zusatzpunkte_direct_match) {
 	for (int i = 0; i < data->values.size(); ++i) {
 		for (int j = 0; j < data->values[0].size(); ++j) {
 			auto& pp = data->values[i][j].personPoints;
@@ -65,17 +65,26 @@ void processExtrema(std::shared_ptr<Data> data) {
 				pp = -100;
 				wp = -100;
 			} else if (pp == 15 && wp == 15) {
-				pp = 25;
-				wp = 25;
+				pp = 15 + zusatzpunkte_direct_match;
+				wp = 15 + zusatzpunkte_direct_match;
 			}
 		}
 	}
 }
 
 int main(int argc, char** argv) {
-	if (argc != 2) {
+	if (argc < 2) {
 		std::cout << "Usage: Belegium_Matcher.exe [inputfile]" << std::endl;
 		return -1;
+	}
+	
+	int zusatzpunkte_direct_match = 10;
+	
+	if (argc == 3) {
+        zusatzpunkte_direct_match = std::stoi(argv[2]);  // Konvertiert das zweite Argument in einen Integer
+		std::cout << "Das Argument für Direct Matches Zusatzpunkte wurde angegeben (standard wäre 10) und hat den Wert " << zusatzpunkte_direct_match << std::endl;
+	} else {
+		std::cout << "Es wurde kein Argument für Direct Matches Zusatzpunkte dahinter übergeben, daher wird standard 10 verwendet" << std::endl;
 	}
 
 	InputReader ir;
@@ -84,7 +93,7 @@ int main(int argc, char** argv) {
 
 	if (input == nullptr) return -2;
 
-	processExtrema(input);
+	processExtrema(input, zusatzpunkte_direct_match);
 	processRoomCounts(input);
 
 	std::cout << std::endl;
