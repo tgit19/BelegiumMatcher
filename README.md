@@ -31,6 +31,14 @@ The program uses the Hungarian Algorithm which always finds the optimal solution
     Solution 3:
     (WG3;Person1;10/8) (WG2;Person2;13/12) (WG1;Person3;18/8)
     ```
+    The algorithm generally calculates a value for each pairing and finds the solution with the maximum sum.\
+    First, a 15/15 pair is upgraded to a 25/25 pair, and a 0 pair is downgraded to -100/-100.\
+    This makes it extremely unlikely that a 0 pair will be selected, because all other solutions would have to be worse.\
+    A 15/15 pair is very likely to be selected, but not necessary, because there can be better solutions without a specific perfect match.
+
+   - Solution 1 uses a+b to score the pairs.
+   - Solution 2 uses a\*b (result is negated if a or b is -100) This results in A good pairs like 14/14 having more influence on the solution than a 12/12.
+   - Solution 3 uses a\*b - (|a-b| / 3), so a 10/4 pair is worse than a 7/7 pair because it subtracts the difference of the scores multiplied by a reasonable factor.
 
 ## Build
 If you want to build the project from source:
