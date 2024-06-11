@@ -74,7 +74,7 @@ void processExtrema(std::shared_ptr<Data> data, int zusatzpunkte_direct_match) {
 
 int main(int argc, char** argv) {
 	if (argc < 2) {
-		std::cout << "Usage: Belegium_Matcher.exe [inputfile]" << std::endl;
+		std::cout << "Usage: Belegium_Matcher.exe [inputfile] (optional number of extra points for direct match)" << std::endl;
 		return -1;
 	}
 	
@@ -99,11 +99,26 @@ int main(int argc, char** argv) {
 	std::cout << std::endl;
 
 	// solve with diffreren heuristics
-	std::cout << "Solution 1:" << std::endl;
+	std::cout << "The solutions are calculated by using different functions to combine two values into a score." << std::endl;
+	std::cout << "The score stand for how good a person and WG fit together and is used to calculate the best configuration of person and WG" << std::endl;
+	std::cout << "This maximizes the sum over found person/WG combinations scores" << std::endl;
+	std::cout << "To calculate the score of a possible person/WG combination the score a person gives to a WG (a) and the score a WG gives to a person are considered (b)" << std::endl;
+	std::cout << std::endl;
+	// I an not 100% sure a and b are this way and not the other one around
+	std::cout << "Solution 1: a+b" << std::endl;
+	// It promotes matches that are generally favorable to both parties but doesn't necessarily maximize the degree of mutual preference.
+	// 10 / 1 will be picked over 5 / 5
 	solveHungarian(*input, [](int a, int b) { return a + b; });
-	std::cout << "Solution 2:" << std::endl;
+	
+	std::cout << std::endl;
+	std::cout << "Solution 2: a*b" << std::endl;
+	// This approach prioritizes highly compatible matches but may ignore moderately good matches that could fill more slots effectively.
 	solveHungarian(*input, [](int a, int b) { return ((a < 0 || b < 0) ? -1 : +1) * std::abs(a * b); }); // just a*b but fixed for negative numbers
-	std::cout << "Solution 3:" << std::endl;
+	
+	std::cout << std::endl;
+	std::cout << "Solution 3: (a + b - |a - b| / 3) small penalty for difference of values => 7/7 is better than 3/11" << std::endl;
+	// start with a + b but penatly for difference
+	// It favors pairs with balanced mutual preferences
 	solveHungarian(*input, [](int a, int b) { return a + b - std::abs(a - b) / 3; }); // small penalty for difference of values => 7/7 is better than 3/11
 
 	std::cout << "\n\nPress enter to exit" << std::endl;

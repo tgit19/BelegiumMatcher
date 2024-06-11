@@ -2,13 +2,13 @@ import os
 import sys
 import random
 
-wNum = 10
-pNum = 10
+wNum = 4
+pNum = 4
 if len(sys.argv) == 3:
     wNum = int(sys.argv[1])
     pNum = int(sys.argv[2])
 
-with open('rand.csv', 'w+') as f:
+with open('rand4x4.csv', 'w+') as f:
     f.write(';')
     for i in range(0, wNum):
         f.write(f"w{i};")

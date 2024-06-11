@@ -51,3 +51,4 @@ If you want to build the project from source:
     - MSBuild Belegium_Matcher.sln /p:Configuration=Release /p:Platform="x64"
 4. Executables are in /bin
     - execute: see 3.
+    - e.g. .\bin\Release-windows-x86_64\Belegium_Matcher.exe .\tests\t2.csv 7
