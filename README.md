@@ -18,8 +18,15 @@ The program uses the Hungarian Algorithm which always finds the optimal solution
 
     There must be an empty line between the first and second table!
 
-2. Download the .exe from the latest Release.
-3. Either drag the csv-file on the exe or run the program with the file as argument.\
+2. Download the .exe from the folder bin\Release-windows-x86_64\Belegium_Matcher.exe
+3. Open a command prompt in the directory of the executable and write: 
+"
+Belegium_Matcher.exe <name_of_csv_file> <(optional) number_of_extra_points_for_direct_match>
+" (without the "")
+where <name_of_csv_file> gets replaced by the name of the csv file
+(it must be in the same directory or insert the relative path to the data)
+e.g. in the base folder of the directory:
+.\bin\Release-windows-x86_64\Belegium_Matcher.exe .\tests\t2.csv 7
 
 4. There are 3 results using different heuristics.
     You see lists of person-WG-pairs with their rating:
@@ -31,6 +38,7 @@ The program uses the Hungarian Algorithm which always finds the optimal solution
     Solution 3:
     (WG3;Person1;10/8) (WG2;Person2;13/12) (WG1;Person3;18/8)
     ```
+    
     The algorithm generally calculates a value for each pairing and finds the solution with the maximum sum.\
     First, a 15/15 pair is upgraded to a 25/25 pair, and a 0 pair is downgraded to -100/-100.\
     This makes it extremely unlikely that a 0 pair will be selected, because all other solutions would have to be worse.\
@@ -43,6 +51,13 @@ The program uses the Hungarian Algorithm which always finds the optimal solution
 ## Build
 If you want to build the project from source:
 1. Install [premake](https://premake.github.io/)
+    - download for windows (and add it to environment path)
 2. Generate project-files for whatever you use cmake, make, visual studio, xcode ...
+    - (install MSBuild by downlaoding the visual studio build tools 2022
+    (and add it to environment path))
 3. Build
+    - premake5 vs2022
+    - MSBuild Belegium_Matcher.sln /p:Configuration=Release /p:Platform="x64"
 4. Executables are in /bin
+    - execute: see 3.
+    - e.g. .\bin\Release-windows-x86_64\Belegium_Matcher.exe .\tests\t2.csv 7

@@ -1,6 +1,7 @@
 #include "Utils.h"
 
 std::string trim(std::string s) {
+	// removes spaces at the beginning and end of the string
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char c) {
 		return !std::isspace(c);
 	}));
@@ -13,6 +14,7 @@ std::string trim(std::string s) {
 }
 
 std::vector<std::string> split(std::string const& s, char delim) {
+	// divide string into vector of string based on specifiy delimitor
 	if (trim(s).empty()) {
 		return std::vector<std::string>();
 	}

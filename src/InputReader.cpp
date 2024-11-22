@@ -265,21 +265,37 @@ std::unordered_set<std::string> InputReader::getNamesFromTableHeader(const std::
 }
 
 void InputReader::printTable(const std::vector<std::string>& headerTop, const std::vector<std::string>& headerLeft, const std::vector<std::vector<PrefPair>>& values) {
-	std::cout << std::string(10, ' ');
+	
+	int max_padding_top = 10; 
+    for (const auto& h : headerTop) {
+        max_padding_top = std::max(max_padding_top, static_cast<int>(h.size()));
+    }
+	max_padding_top += 1;
+	int max_padding_left = 10; 
+    for (const auto& l : headerLeft) {
+        max_padding_left = std::max(max_padding_left, static_cast<int>(l.size()));
+    }
+	max_padding_left += 1;
+	
+	std::cout << "max padding top for this one is" << max_padding_top << std::endl;
+	std::cout << "max padding left for this one is" << max_padding_top << std::endl;
+	
+	std::cout << std::string(max_padding_top, ' ');
 	std::cout << '|';
 	for (const auto& h : headerTop) {
 		std::cout << '|';
-		std::cout << padRight(' ' + h, 10);
+		std::cout << padRight(' ' + h, max_padding_top);
+		
 	}
 	std::cout << std::endl;
-	std::cout << std::string((headerTop.size() + 1) * 11 + 1, '-');
+	std::cout << std::string((headerTop.size() + 1) * (max_padding_top) + 1, '-');
+	
 	std::cout << std::endl;
 	for (int i = 0; i < headerLeft.size(); ++i) {
-		std::cout << padRight(' ' + headerLeft[i], 10);
-		std::cout << '|';
+		std::cout << padRight(' ' + headerLeft[i], max_padding_left) << '|';
 		for (int j = 0; j < values[i].size(); ++j) {
 			std::cout << '|';
-			std::cout << padLeft(std::to_string(values[i][j].personPoints) + '/' + std::to_string(values[i][j].wgPoints) + ' ', 10);
+			std::cout << padLeft(std::to_string(values[i][j].personPoints) + '/' + std::to_string(values[i][j].wgPoints) + ' ', max_padding_top);
 		}
 		std::cout << std::endl;
 	}
