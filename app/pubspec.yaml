@@ -31,10 +31,16 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # A package that allows you to use a native file explorer to pick single
+  # or multiple absolute file paths, with extension filtering support.
+  file_picker: ^8.1.2
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
+  # Flutter plugin for reading and writing simple key-value pairs.
+  shared_preferences: ^2.3.2
+
+  # Toastification is a Flutter package that allows you to easily
+  # show toast and notification messages in your application.
+  toastification: ^2.2.0
 
 dev_dependencies:
   flutter_test:
