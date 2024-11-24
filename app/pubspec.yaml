@@ -41,6 +41,10 @@ dependencies:
   # Toastification is a Flutter package that allows you to easily
   # show toast and notification messages in your application.
   toastification: ^2.2.0
+  
+  # Library for defining parsers for parsing raw command-line arguments into a set
+  #  of options and values using GNU and POSIX style options.
+  args: ^2.6.0
 
 dev_dependencies:
   flutter_test:

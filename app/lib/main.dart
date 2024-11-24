@@ -1,3 +1,4 @@
+import 'package:args/args.dart';
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 
@@ -8,8 +9,30 @@ import 'view/screens/input.dart';
 import 'view/screens/results.dart';
 
 void main(List<String> args) {
+  // create args paser and configure it
+  ArgParser parser = ArgParser();
+  parser.addOption("-exta");
+
+  // parse options and handle results
+  ArgResults results = parser.parse(args);
+  String? inputFileName = results.rest.firstOrNull;
+  String? extraPoints = results.option("-extra");
+
+  /// service to handle input files
+  final InputFileService fileService = InputFileService(
+    // preload file from args if set
+    file: inputFileName != null ? InputFile(inputFileName) : null,
+  );
+
+  if (extraPoints != null) {
+    int? points = int.tryParse(extraPoints);
+    if (points != null) {
+      fileService.setDirectMatchBonus(points);
+    }
+  }
+
   runApp(
-    App(inputFileName: args.firstOrNull),
+    App(fileService: fileService),
   );
 }
 
@@ -17,12 +40,10 @@ class App extends StatelessWidget {
   /// service to handle input files
   final InputFileService fileService;
 
-  App({
+  const App({
     super.key,
-    String? inputFileName,
-  }) : fileService = InputFileService(
-          file: inputFileName != null ? InputFile(inputFileName) : null,
-        );
+    required this.fileService,
+  });
 
   @override
   Widget build(BuildContext context) => ToastificationWrapper(
