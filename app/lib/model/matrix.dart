@@ -1,24 +1,32 @@
 import 'dart:math';
 
-import 'package:belegium_matcher/model/dimension.dart';
+import 'dimension.dart';
+import 'matrix_storage.dart';
 
 class Matrix {
   /// dimension of this matrix
   final Dimension dimension;
 
   /// data storage
-  final List<List<double>> data;
+  final MatrixStorage<int> data;
 
   /// constructor to create a matrix
-  Matrix(this.dimension)
-      : data = List<List<double>>.generate(
+  Matrix(
+    this.dimension, {
+    int? fillValue,
+  }) : data = MatrixStorage<int>.generate(
           dimension.m,
-          (_) => List<double>.filled(dimension.n, 0),
+          (_) => List<int>.filled(dimension.n, fillValue ?? 0),
         );
 
   /// factory constructor to create a square matrix
-  factory Matrix.square(int dimension) => Matrix(
+  factory Matrix.square(
+    int dimension, {
+    int? fillValue,
+  }) =>
+      Matrix(
         Dimension.square(dimension),
+        fillValue: fillValue,
       );
 
   /// factory constructor for identity matrix
@@ -33,7 +41,7 @@ class Matrix {
   }
 
   /// factory constructor to create matrix from data
-  factory Matrix.fromData(List<List<double>> data) {
+  factory Matrix.fromData(MatrixStorage<int> data) {
     int m = data.length;
     int n = data.first.length;
 
@@ -49,10 +57,10 @@ class Matrix {
   }
 
   /// operator to read the rows of the matrix
-  List<double> operator [](int index) => data[index];
+  List<int> operator [](int index) => data[index];
 
   /// opertator to write cell of the matrix
-  void operator []=(List<int> position, double value) {
+  void operator []=(List<int> position, int value) {
     data[position.first][position.last] = value;
   }
 
@@ -66,7 +74,7 @@ class Matrix {
 
     for (int i = 0; i < dimension.m; i++) {
       for (int j = 0; j < dimension.n; j++) {
-        matrix[[i, j]] = data[i][j] + other[i][j];
+        matrix[[i, j]] = (data[i][j] + other[i][j]);
       }
     }
 
@@ -83,7 +91,7 @@ class Matrix {
 
     for (int i = 0; i < dimension.m; i++) {
       for (int j = 0; j < dimension.n; j++) {
-        matrix[[i, j]] = data[i][j] - other[i][j];
+        matrix[[i, j]] = (data[i][j] - other[i][j]);
       }
     }
 
@@ -92,7 +100,7 @@ class Matrix {
 
   /// operator to multiply two matrices
   Matrix operator *(Matrix other) {
-    if (dimension.n != other.dimension.m) {
+    if (!dimension.isQuadratic) {
       throw ArgumentError(
           "Matrix dimensions must be compatible for multiplication.");
     }
@@ -106,9 +114,9 @@ class Matrix {
 
     for (int i = 0; i < dimension.m; i++) {
       for (int j = 0; j < other.dimension.n; j++) {
-        double sum = 0;
+        int sum = 0;
         for (int r = 0; r < dimension.n; r++) {
-          sum += data[i][r] * other[r][j];
+          sum = (sum + data[i][r] * other[r][j]);
         }
         matrix[[i, j]] = sum;
       }
@@ -136,7 +144,7 @@ class Matrix {
 
     for (int i = 0; i < dimension.m; i++) {
       for (int j = 0; j < dimension.n; j++) {
-        matrix[i][j] = factor * data[i][j];
+        matrix[i][j] = (factor * data[i][j]) as int;
       }
     }
 
@@ -159,7 +167,7 @@ class Matrix {
   }
 
   /// get the submatrix at [position]
-  Matrix submatrix(List<int> position) {
+  Matrix submatrix(List position) {
     assert(position.first >= 0 && position.last >= 0);
     assert(position.first < dimension.m);
     assert(position.last < dimension.n);
@@ -181,9 +189,35 @@ class Matrix {
     return matrix;
   }
 
+  /// get one vector (row) from the matrix
+  Matrix row(int position) {
+    Matrix vector = Matrix(
+      Dimension(1, dimension.n),
+    );
+
+    for (int i = 0; i < dimension.n; i++) {
+      vector[0][i] = data[position][i];
+    }
+
+    return vector;
+  }
+
+  /// get one vector (column) from the matrix
+  Matrix column(int position) {
+    Matrix vector = Matrix(
+      Dimension(dimension.m, 1),
+    );
+
+    for (int i = 0; i < dimension.m; i++) {
+      vector[i][0] = data[i][position];
+    }
+
+    return vector;
+  }
+
   /// method to calculate the determinant of this matrix
-  double determinant() {
-    if (dimension.m != dimension.n) {
+  int determinant() {
+    if (!dimension.isQuadratic) {
       throw ArgumentError("Matrix dimension must be quadratic.");
     }
 
@@ -194,7 +228,7 @@ class Matrix {
       return (data[0][0] * data[1][1] - data[0][1] * data[1][0]);
     }
 
-    double det = 0;
+    int det = 0;
 
     // Calculate subdeterminates for first row
     for (int j = 0; j < dimension.n; j++) {
@@ -202,7 +236,7 @@ class Matrix {
       Matrix minor = submatrix([0, j]);
 
       // Use cofactor expansion along the first row
-      det += pow(-1, j) * data[0][j] * minor.determinant();
+      det = (det + pow(-1, j) * data[0][j] * minor.determinant()) as int;
     }
 
     return det;
@@ -213,7 +247,7 @@ class Matrix {
 
   /// method to calculate the cofactor matrix
   Matrix cofactorMatrix() {
-    if (dimension.m != dimension.n) {
+    if (!dimension.isQuadratic) {
       throw ArgumentError("Matrix dimension must be quadratic.");
     }
 
@@ -225,7 +259,7 @@ class Matrix {
         Matrix minor = submatrix([i, j]);
 
         // Cofactor calculation with sign change
-        matrix[i][j] = ((i + j) % 2 == 0 ? 1 : -1) * minor.determinant();
+        matrix[i][j] = (((i + j) % 2 == 0 ? 1 : -1) * minor.determinant());
       }
     }
 
@@ -234,11 +268,11 @@ class Matrix {
 
   /// calculate the inverse matrix
   Matrix? invert() {
-    if (dimension.m != dimension.n) {
+    if (!dimension.isQuadratic) {
       throw ArgumentError("Matrix dimension must be quadratic.");
     }
 
-    double det = determinant();
+    int det = determinant();
 
     if (det == 0) {
       return null;
@@ -247,12 +281,103 @@ class Matrix {
     return adjugate().scale(1 / det);
   }
 
+  /// combine two matrices element wise
+  Matrix combine(
+    Matrix other,
+    int Function(int a, int b) combine,
+  ) {
+    if (dimension != other.dimension) {
+      throw ArgumentError(
+          "Matrix dimensions must be compatible for combination.");
+    }
+
+    Matrix matrix = Matrix(dimension);
+
+    for (int i = 0; i < dimension.n; i++) {
+      for (int j = 0; j < dimension.n; j++) {
+        matrix[i][j] = combine(data[i][j], other[i][j]);
+      }
+    }
+
+    return matrix;
+  }
+
+  /// extend matrix with rows
+  Matrix addRows(Matrix rows) {
+    if (dimension.n != rows.dimension.n) {
+      throw ArgumentError(
+          "Matrix dimensions must be compatible for extension.");
+    }
+    Matrix matrix = Matrix(
+      Dimension(dimension.m + rows.dimension.m, dimension.n),
+    );
+
+    int i = 0;
+
+    for (; i < dimension.m; i++) {
+      for (int j = 0; j < dimension.n; j++) {
+        matrix[i][j] = data[i][j];
+      }
+    }
+
+    for (int k = 0; k < rows.dimension.m; k++) {
+      for (int j = 0; j < dimension.n; j++) {
+        matrix[i + k][j] = rows[k][j];
+      }
+    }
+
+    return matrix;
+  }
+
+  /// extend matrix with columns
+  Matrix addColumns(Matrix columns) {
+    if (dimension.m != columns.dimension.m) {
+      throw ArgumentError(
+          "Matrix dimensions must be compatible for extension.");
+    }
+    Matrix matrix = Matrix(
+      Dimension(dimension.m, dimension.n + columns.dimension.n),
+    );
+
+    for (int i = 0; i < dimension.m; i++) {
+      int j = 0;
+
+      for (; j < dimension.n; j++) {
+        matrix[i][j] = data[i][j];
+      }
+
+      for (int k = 0; k < columns.dimension.n; k++) {
+        matrix[i][j + k] = columns[i][k];
+      }
+    }
+
+    return matrix;
+  }
+
+  /// extend matrix to become quadratic
+  Matrix quadratic([int? fillValue]) {
+    Matrix matrix = Matrix(
+      Dimension.square(
+        max(dimension.m, dimension.n),
+      ),
+      fillValue: fillValue,
+    );
+
+    for (int i = 0; i < dimension.m; i++) {
+      for (int j = 0; j < dimension.n; j++) {
+        matrix[i][j] = data[i][j];
+      }
+    }
+
+    return matrix;
+  }
+
   @override
   String toString() => data.fold<String>(
         "",
-        (String current, List<double> m) => m.fold<String>(
+        (String current, List<int> m) => m.fold<String>(
           "$current\n",
-          (String line, double value) => "$line\t$value",
+          (String line, int value) => "$line\t$value",
         ),
       );
 }
