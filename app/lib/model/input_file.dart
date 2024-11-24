@@ -23,7 +23,7 @@ class InputFile {
   InputFile(String filepath) : _file = File(filepath);
 
   /// method to load content
-  Future<List<Matrix>> load() async {
+  Future<List<Matrix<int>>> load() async {
     // clear old data
     _clear();
 
@@ -61,7 +61,7 @@ class InputFile {
   }
 
   /// method to load content synchronously
-  List<Matrix> loadSync() {
+  List<Matrix<int>> loadSync() {
     // clear old data
     _clear();
 
@@ -346,14 +346,14 @@ class InputFile {
   }
 
   /// internal method to parse loaded tables to matrices
-  List<Matrix> _parseTables() => [
+  List<Matrix<int>> _parseTables() => [
         _parseTable(tables.first),
         _parseTable(tables.last),
       ];
 
   /// internal method to parse a single table to its matrix
-  Matrix _parseTable(MatrixStorage<String> table) {
-    Matrix matrix = Matrix(
+  Matrix<int> _parseTable(MatrixStorage<String> table) {
+    Matrix<int> matrix = Matrix<int>(
       Dimension(table.length - 1, table.first.length - 1),
     );
 

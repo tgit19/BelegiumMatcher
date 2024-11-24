@@ -3,26 +3,26 @@ import 'dart:math';
 import 'dimension.dart';
 import 'matrix_storage.dart';
 
-class Matrix {
+class Matrix<T extends num> {
   /// dimension of this matrix
   final Dimension dimension;
 
   /// data storage
-  final MatrixStorage<int> data;
+  final MatrixStorage<T> data;
 
   /// constructor to create a matrix
   Matrix(
     this.dimension, {
-    int? fillValue,
-  }) : data = MatrixStorage<int>.generate(
+    T? fillValue,
+  }) : data = MatrixStorage<T>.generate(
           dimension.m,
-          (_) => List<int>.filled(dimension.n, fillValue ?? 0),
+          (_) => List<T>.filled(dimension.n, fillValue ?? 0 as T),
         );
 
   /// factory constructor to create a square matrix
   factory Matrix.square(
     int dimension, {
-    int? fillValue,
+    T? fillValue,
   }) =>
       Matrix(
         Dimension.square(dimension),
@@ -31,21 +31,21 @@ class Matrix {
 
   /// factory constructor for identity matrix
   factory Matrix.identity(int dimension) {
-    Matrix matrix = Matrix.square(dimension);
+    Matrix<T> matrix = Matrix.square(dimension);
 
     for (var i = 0; i < dimension; i++) {
-      matrix[i][i] = 1;
+      matrix[i][i] = 1 as T;
     }
 
     return matrix;
   }
 
   /// factory constructor to create matrix from data
-  factory Matrix.fromData(MatrixStorage<int> data) {
+  factory Matrix.fromData(MatrixStorage<T> data) {
     int m = data.length;
     int n = data.first.length;
 
-    Matrix matrix = Matrix(Dimension(m, n));
+    Matrix<T> matrix = Matrix(Dimension(m, n));
 
     for (int i = 0; i < m; i++) {
       for (int j = 0; j < n; j++) {
@@ -57,24 +57,24 @@ class Matrix {
   }
 
   /// operator to read the rows of the matrix
-  List<int> operator [](int index) => data[index];
+  List<T> operator [](int index) => data[index];
 
   /// opertator to write cell of the matrix
-  void operator []=(List<int> position, int value) {
+  void operator []=(List<int> position, T value) {
     data[position.first][position.last] = value;
   }
 
   /// operator to add two matrices
-  Matrix operator +(Matrix other) {
+  Matrix<T> operator +(Matrix<T> other) {
     if (dimension != other.dimension) {
       throw ArgumentError("Matrix dimensions must be compatible for addition.");
     }
 
-    Matrix matrix = Matrix(dimension);
+    Matrix<T> matrix = Matrix(dimension);
 
     for (int i = 0; i < dimension.m; i++) {
       for (int j = 0; j < dimension.n; j++) {
-        matrix[[i, j]] = (data[i][j] + other[i][j]);
+        matrix[[i, j]] = (data[i][j] + other[i][j]) as T;
       }
     }
 
@@ -82,16 +82,16 @@ class Matrix {
   }
 
   /// operator to substract two matrices
-  Matrix operator -(Matrix other) {
+  Matrix<T> operator -(Matrix<T> other) {
     if (dimension != other.dimension) {
       throw ArgumentError("Matrix dimensions must be compatible for addition.");
     }
 
-    Matrix matrix = Matrix(dimension);
+    Matrix<T> matrix = Matrix(dimension);
 
     for (int i = 0; i < dimension.m; i++) {
       for (int j = 0; j < dimension.n; j++) {
-        matrix[[i, j]] = (data[i][j] - other[i][j]);
+        matrix[[i, j]] = (data[i][j] - other[i][j]) as T;
       }
     }
 
@@ -99,13 +99,13 @@ class Matrix {
   }
 
   /// operator to multiply two matrices
-  Matrix operator *(Matrix other) {
+  Matrix<T> operator *(Matrix<T> other) {
     if (!dimension.isQuadratic) {
       throw ArgumentError(
           "Matrix dimensions must be compatible for multiplication.");
     }
 
-    Matrix matrix = Matrix(
+    Matrix<T> matrix = Matrix(
       Dimension(
         dimension.m,
         other.dimension.n,
@@ -114,9 +114,9 @@ class Matrix {
 
     for (int i = 0; i < dimension.m; i++) {
       for (int j = 0; j < other.dimension.n; j++) {
-        int sum = 0;
+        T sum = 0 as T;
         for (int r = 0; r < dimension.n; r++) {
-          sum = (sum + data[i][r] * other[r][j]);
+          sum = (sum + data[i][r] * other[r][j]) as T;
         }
         matrix[[i, j]] = sum;
       }
@@ -126,8 +126,8 @@ class Matrix {
   }
 
   /// method to copy this matrix
-  Matrix copy() {
-    Matrix matrix = Matrix(dimension);
+  Matrix<T> copy() {
+    Matrix<T> matrix = Matrix(dimension);
 
     for (int i = 0; i < dimension.m; i++) {
       for (int j = 0; j < dimension.n; j++) {
@@ -139,12 +139,12 @@ class Matrix {
   }
 
   /// method to scale this matrix with a scalar factor
-  Matrix scale(double factor) {
-    Matrix matrix = Matrix(dimension);
+  Matrix<T> scale(double factor) {
+    Matrix<T> matrix = Matrix(dimension);
 
     for (int i = 0; i < dimension.m; i++) {
       for (int j = 0; j < dimension.n; j++) {
-        matrix[i][j] = (factor * data[i][j]) as int;
+        matrix[i][j] = (factor * data[i][j]) as T;
       }
     }
 
@@ -152,8 +152,8 @@ class Matrix {
   }
 
   /// method to transpose this matrix
-  Matrix transpose() {
-    Matrix matrix = Matrix(
+  Matrix<T> transpose() {
+    Matrix<T> matrix = Matrix(
       Dimension(dimension.n, dimension.m),
     );
 
@@ -167,14 +167,14 @@ class Matrix {
   }
 
   /// get the submatrix at [position]
-  Matrix submatrix(List position) {
+  Matrix<T> submatrix(List<int> position) {
     assert(position.first >= 0 && position.last >= 0);
     assert(position.first < dimension.m);
     assert(position.last < dimension.n);
     assert(dimension.m > 1);
     assert(dimension.n > 1);
 
-    Matrix matrix = Matrix(
+    Matrix<T> matrix = Matrix(
       Dimension(dimension.m - 1, dimension.n - 1),
     );
 
@@ -190,8 +190,8 @@ class Matrix {
   }
 
   /// get one vector (row) from the matrix
-  Matrix row(int position) {
-    Matrix vector = Matrix(
+  Matrix<T> row(int position) {
+    Matrix<T> vector = Matrix(
       Dimension(1, dimension.n),
     );
 
@@ -203,8 +203,8 @@ class Matrix {
   }
 
   /// get one vector (column) from the matrix
-  Matrix column(int position) {
-    Matrix vector = Matrix(
+  Matrix<T> column(int position) {
+    Matrix<T> vector = Matrix(
       Dimension(dimension.m, 1),
     );
 
@@ -216,7 +216,7 @@ class Matrix {
   }
 
   /// method to calculate the determinant of this matrix
-  int determinant() {
+  T determinant() {
     if (!dimension.isQuadratic) {
       throw ArgumentError("Matrix dimension must be quadratic.");
     }
@@ -225,41 +225,41 @@ class Matrix {
     if (dimension.n == 1) {
       return data.first.first;
     } else if (dimension.n == 2) {
-      return (data[0][0] * data[1][1] - data[0][1] * data[1][0]);
+      return (data[0][0] * data[1][1] - data[0][1] * data[1][0]) as T;
     }
 
-    int det = 0;
+    T det = 0 as T;
 
     // Calculate subdeterminates for first row
     for (int j = 0; j < dimension.n; j++) {
       // Create a minor matrix by excluding the current row and column
-      Matrix minor = submatrix([0, j]);
+      Matrix<T> minor = submatrix([0, j]);
 
       // Use cofactor expansion along the first row
-      det = (det + pow(-1, j) * data[0][j] * minor.determinant()) as int;
+      det = (det + pow(-1, j) * data[0][j] * minor.determinant()) as T;
     }
 
     return det;
   }
 
   /// method to calculate the adjugate of this matrix
-  Matrix adjugate() => cofactorMatrix().transpose();
+  Matrix<T> adjugate() => cofactorMatrix().transpose();
 
   /// method to calculate the cofactor matrix
-  Matrix cofactorMatrix() {
+  Matrix<T> cofactorMatrix() {
     if (!dimension.isQuadratic) {
       throw ArgumentError("Matrix dimension must be quadratic.");
     }
 
-    Matrix matrix = Matrix(dimension);
+    Matrix<T> matrix = Matrix(dimension);
 
     for (int i = 0; i < dimension.n; i++) {
       for (int j = 0; j < dimension.n; j++) {
         // Create the minor matrix by excluding the ith row and jth column
-        Matrix minor = submatrix([i, j]);
+        Matrix<T> minor = submatrix([i, j]);
 
         // Cofactor calculation with sign change
-        matrix[i][j] = (((i + j) % 2 == 0 ? 1 : -1) * minor.determinant());
+        matrix[i][j] = (((i + j) % 2 == 0 ? 1 : -1) * minor.determinant()) as T;
       }
     }
 
@@ -267,12 +267,12 @@ class Matrix {
   }
 
   /// calculate the inverse matrix
-  Matrix? invert() {
+  Matrix<T>? invert() {
     if (!dimension.isQuadratic) {
       throw ArgumentError("Matrix dimension must be quadratic.");
     }
 
-    int det = determinant();
+    T det = determinant();
 
     if (det == 0) {
       return null;
@@ -282,16 +282,16 @@ class Matrix {
   }
 
   /// combine two matrices element wise
-  Matrix combine(
-    Matrix other,
-    int Function(int a, int b) combine,
+  Matrix<T> combine(
+    Matrix<T> other,
+    T Function(T a, T b) combine,
   ) {
     if (dimension != other.dimension) {
       throw ArgumentError(
           "Matrix dimensions must be compatible for combination.");
     }
 
-    Matrix matrix = Matrix(dimension);
+    Matrix<T> matrix = Matrix(dimension);
 
     for (int i = 0; i < dimension.n; i++) {
       for (int j = 0; j < dimension.n; j++) {
@@ -303,12 +303,12 @@ class Matrix {
   }
 
   /// extend matrix with rows
-  Matrix addRows(Matrix rows) {
+  Matrix<T> addRows(Matrix<T> rows) {
     if (dimension.n != rows.dimension.n) {
       throw ArgumentError(
           "Matrix dimensions must be compatible for extension.");
     }
-    Matrix matrix = Matrix(
+    Matrix<T> matrix = Matrix(
       Dimension(dimension.m + rows.dimension.m, dimension.n),
     );
 
@@ -330,12 +330,12 @@ class Matrix {
   }
 
   /// extend matrix with columns
-  Matrix addColumns(Matrix columns) {
+  Matrix<T> addColumns(Matrix<T> columns) {
     if (dimension.m != columns.dimension.m) {
       throw ArgumentError(
           "Matrix dimensions must be compatible for extension.");
     }
-    Matrix matrix = Matrix(
+    Matrix<T> matrix = Matrix(
       Dimension(dimension.m, dimension.n + columns.dimension.n),
     );
 
@@ -355,8 +355,8 @@ class Matrix {
   }
 
   /// extend matrix to become quadratic
-  Matrix quadratic([int? fillValue]) {
-    Matrix matrix = Matrix(
+  Matrix<T> quadratic([T? fillValue]) {
+    Matrix<T> matrix = Matrix(
       Dimension.square(
         max(dimension.m, dimension.n),
       ),
@@ -372,12 +372,38 @@ class Matrix {
     return matrix;
   }
 
+  /// convert matrix to int matrix
+  Matrix<int> toInt() {
+    Matrix<int> matrix = Matrix(dimension);
+
+    for (int i = 0; i < dimension.n; i++) {
+      for (int j = 0; j < dimension.n; j++) {
+        matrix[i][j] = data[i][j].toInt();
+      }
+    }
+
+    return matrix;
+  }
+
+  /// convert matrix to double matrix
+  Matrix<double> toDouble() {
+    Matrix<double> matrix = Matrix(dimension);
+
+    for (int i = 0; i < dimension.n; i++) {
+      for (int j = 0; j < dimension.n; j++) {
+        matrix[i][j] = data[i][j].toDouble();
+      }
+    }
+
+    return matrix;
+  }
+
   @override
   String toString() => data.fold<String>(
         "",
-        (String current, List<int> m) => m.fold<String>(
+        (String current, List<T> m) => m.fold<String>(
           "$current\n",
-          (String line, int value) => "$line\t$value",
+          (String line, T value) => "$line\t$value",
         ),
       );
 }
