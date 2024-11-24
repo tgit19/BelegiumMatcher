@@ -11,12 +11,12 @@ import 'view/screens/results.dart';
 void main(List<String> args) {
   // create args paser and configure it
   ArgParser parser = ArgParser();
-  parser.addOption("-exta");
+  parser.addOption("extra");
 
   // parse options and handle results
   ArgResults results = parser.parse(args);
   String? inputFileName = results.rest.firstOrNull;
-  String? extraPoints = results.option("-extra");
+  String? extraPoints = results.option("extra");
 
   /// service to handle input files
   final InputFileService fileService = InputFileService(
