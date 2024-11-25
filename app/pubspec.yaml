@@ -35,9 +35,6 @@ dependencies:
   # or multiple absolute file paths, with extension filtering support.
   file_picker: ^8.1.2
 
-  # Flutter plugin for reading and writing simple key-value pairs.
-  shared_preferences: ^2.3.2
-
   # Toastification is a Flutter package that allows you to easily
   # show toast and notification messages in your application.
   toastification: ^2.2.0
