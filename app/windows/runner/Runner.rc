@@ -95,7 +95,7 @@ BEGIN
             VALUE "InternalName", "belegium_matcher" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "belegium_matcher.exe" "\0"
-            VALUE "ProductName", "belegium_matcher" "\0"
+            VALUE "ProductName", "Belegium Matcher" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
