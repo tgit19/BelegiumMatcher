@@ -48,8 +48,12 @@ class InputFileService extends ChangeNotifier {
   /// store details of errors
   InputException? error;
 
+  /// flag to enable match as soon as possible after load
+  final bool fastForwardMatch;
+
   InputFileService({
     this.file,
+    this.fastForwardMatch = false,
   }) {
     if (file != null) {
       unawaited(
@@ -237,6 +241,10 @@ class InputFileService extends ChangeNotifier {
     } finally {
       _loading = false;
       notifyListeners();
+    }
+
+    if (fastForwardMatch) {
+      await match();
     }
   }
 

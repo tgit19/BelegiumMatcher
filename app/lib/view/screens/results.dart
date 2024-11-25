@@ -16,7 +16,9 @@ class ResultsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+          title: Text("solutions"),
+        ),
         body: ListView(
           children: [
             Divider(),

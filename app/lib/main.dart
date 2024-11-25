@@ -12,16 +12,19 @@ void main(List<String> args) {
   // create args paser and configure it
   ArgParser parser = ArgParser();
   parser.addOption("extra");
+  parser.addFlag("ff", defaultsTo: false);
 
   // parse options and handle results
   ArgResults results = parser.parse(args);
   String? inputFileName = results.rest.firstOrNull;
   String? extraPoints = results.option("extra");
+  bool fastForwardMatch = results.flag("ff");
 
   /// service to handle input files
   final InputFileService fileService = InputFileService(
     // preload file from args if set
     file: inputFileName != null ? InputFile(inputFileName) : null,
+    fastForwardMatch: fastForwardMatch,
   );
 
   if (extraPoints != null) {
@@ -31,9 +34,23 @@ void main(List<String> args) {
     }
   }
 
-  runApp(
-    App(fileService: fileService),
-  );
+  /// private sub function to start app after matching on fast forward
+  void ffStartApp() {
+    if (!(fileService.loading || fileService.matching)) {
+      fileService.removeListener(ffStartApp);
+      runApp(
+        App(fileService: fileService),
+      );
+    }
+  }
+
+  if (inputFileName != null && fastForwardMatch) {
+    fileService.addListener(ffStartApp);
+  } else {
+    runApp(
+      App(fileService: fileService),
+    );
+  }
 }
 
 class App extends StatelessWidget {
@@ -59,7 +76,11 @@ class App extends StatelessWidget {
             useMaterial3: true,
           ),
           debugShowCheckedModeBanner: false,
-          initialRoute: "/input",
+          initialRoute: fileService.error != null
+              ? "/error"
+              : fileService.results.isNotEmpty
+                  ? "/results"
+                  : "/input",
           routes: {
             "/input": (_) => InputScreen(fileService: fileService),
             "/error": (_) => ErrorScreen(fileService: fileService),

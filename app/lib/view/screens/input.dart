@@ -90,6 +90,10 @@ class _InputScreenState extends State<InputScreen> {
                                     if (value != null) {
                                       Navigator.maybeOf(context)
                                           ?.pushNamed("/error");
+                                    } else if (widget
+                                        .fileService.fastForwardMatch) {
+                                      Navigator.maybeOf(context)
+                                          ?.pushNamed("/results");
                                     }
                                   },
                                 ),
