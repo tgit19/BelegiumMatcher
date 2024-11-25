@@ -293,7 +293,7 @@ class Matrix<T extends num> {
 
     Matrix<T> matrix = Matrix(dimension);
 
-    for (int i = 0; i < dimension.n; i++) {
+    for (int i = 0; i < dimension.m; i++) {
       for (int j = 0; j < dimension.n; j++) {
         matrix[i][j] = combine(data[i][j], other[i][j]);
       }
@@ -370,6 +370,32 @@ class Matrix<T extends num> {
     }
 
     return matrix;
+  }
+
+  /// get the value of the lagest entry
+  T largestEntry() {
+    num number = double.negativeInfinity;
+
+    for (int i = 0; i < dimension.m; i++) {
+      for (int j = 0; j < dimension.n; j++) {
+        number = max(number, data[i][j]);
+      }
+    }
+
+    return number as T;
+  }
+
+  /// get the value of the smallest entry
+  T smallestEntry() {
+    num number = double.infinity;
+
+    for (int i = 0; i < dimension.m; i++) {
+      for (int j = 0; j < dimension.n; j++) {
+        number = min(number, data[i][j]);
+      }
+    }
+
+    return number as T;
   }
 
   /// convert matrix to int matrix

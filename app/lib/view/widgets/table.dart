@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import '../../model/matrix_storage.dart';
 import '../../model/table_position.dart';
 
-/// scene to display the input table and hightlight errors
-class TableScene extends StatelessWidget {
+/// widget to display the input table and hightlight errors
+class TableWidget extends StatelessWidget {
   /// table containig data to display
   final MatrixStorage<String> table;
 
@@ -17,7 +17,7 @@ class TableScene extends StatelessWidget {
   final Color? highlightColor;
 
   /// constructor for table scenes
-  const TableScene({
+  const TableWidget({
     super.key,
     required this.table,
     this.highlightPosition,
