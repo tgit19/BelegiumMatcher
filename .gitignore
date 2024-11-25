@@ -1,9 +1,4 @@
 # Cpp project
-/bin
-/bin-int
-/.vs
-*.sln
-*.vcxproj*
 /tests/BelegiumTest.xlsx
 /tests/BelegiumTest.csv
 /tests/BelegiumTest-long.csv
