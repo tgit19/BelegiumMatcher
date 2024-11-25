@@ -19,6 +19,9 @@ class InputFile {
   final List<String> wgs = [];
   final List<String> persons = [];
 
+  /// store details of input errors
+  InputException? error;
+
   /// constructor for input files
   InputFile(String filepath) : _file = File(filepath);
 
@@ -197,10 +200,12 @@ class InputFile {
         tableSplitPosition ??= currentLine;
 
         if (emptyCount > 1) {
-          throw InputException(
+          error = InputException(
             "Multiple empty lines detected",
             TablePosition(currentLine, null),
           );
+
+          throw error!;
         }
       }
 
@@ -208,10 +213,12 @@ class InputFile {
     }
 
     if (emptyCount == 0) {
-      throw InputException(
+      error = InputException(
         "No empty line detected",
         TablePosition(currentLine - 1, null),
       );
+
+      throw error!;
     }
 
     // make sure tables it empty
@@ -273,20 +280,24 @@ class InputFile {
               )
               .length >
           1) {
-        throw InputException(
+        error = InputException(
           "Name duplicate found",
           TablePosition(headerErrorOffset, i),
         );
+
+        throw error!;
       }
 
       names.add(header[i]);
     }
 
     if (names.isEmpty) {
-      throw InputException(
+      error = InputException(
         "No names found in header",
         TablePosition(headerErrorOffset, null),
       );
+
+      throw error!;
     }
 
     // return list of names
@@ -304,13 +315,15 @@ class InputFile {
     int headerErrorOffset = 0,
   }) {
     if (header.length != table.length - 1) {
-      throw InputException(
+      error = InputException(
         "Dimension missmatch detected",
         tableErrorOffset > headerErrorOffset
             ? TablePosition(null, 0)
             : TablePosition(headerErrorOffset, null),
         tableErrorOffset != 0 ? tableErrorOffset : null,
       );
+
+      throw error!;
     }
 
     List<String> tableHeader = [];
@@ -321,26 +334,32 @@ class InputFile {
 
     for (int i = 0; i < header.length; i++) {
       if (!header.contains(tableHeader[i])) {
-        throw InputException(
+        error = InputException(
           "Name is missing",
           TablePosition(tableErrorOffset + i + 1, 0),
         );
+
+        throw error!;
       }
 
       if (!tableHeader.contains(header[i])) {
-        throw InputException(
+        error = InputException(
           "Name is missing",
           TablePosition(headerErrorOffset, i),
         );
+
+        throw error!;
       }
 
       if (header[i] != tableHeader[i]) {
-        throw InputException(
+        error = InputException(
           "Wrong name order",
           tableErrorOffset > headerErrorOffset
               ? TablePosition(tableErrorOffset + i + 1, 0)
               : TablePosition(headerErrorOffset, i),
         );
+
+        throw error!;
       }
     }
   }

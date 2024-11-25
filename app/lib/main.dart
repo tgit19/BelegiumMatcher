@@ -2,11 +2,10 @@ import 'package:args/args.dart';
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 
+import 'constants.dart';
 import 'model/input_file.dart';
-import 'services/input.dart';
-import 'view/screens/error.dart';
-import 'view/screens/input.dart';
-import 'view/screens/results.dart';
+import 'services/match.dart';
+import 'view/screens/flow.dart';
 
 void main(List<String> args) {
   // create args paser and configure it
@@ -20,52 +19,45 @@ void main(List<String> args) {
   String? extraPoints = results.option("extra");
   bool fastForwardMatch = results.flag("ff");
 
+  int? points = extraPoints != null ? int.tryParse(extraPoints) : null;
+
   /// service to handle input files
-  final InputFileService fileService = InputFileService(
+  final MatchService service = MatchService(
     // preload file from args if set
     file: inputFileName != null ? InputFile(inputFileName) : null,
-    fastForwardMatch: fastForwardMatch,
+    onError: (e) => toastification.show(
+      type: ToastificationType.error,
+      title: Text(
+        e.toString(),
+      ),
+      style: kNotificationSytle,
+      autoCloseDuration: kNotificationCloseDuration,
+      showProgressBar: false,
+      pauseOnHover: true,
+    ),
+    fastStart: fastForwardMatch,
+    fastForward: fastForwardMatch,
+    directMatchBonus: points ?? 10,
   );
 
-  if (extraPoints != null) {
-    int? points = int.tryParse(extraPoints);
-    if (points != null) {
-      fileService.setDirectMatchBonus(points);
-    }
-  }
-
-  /// private sub function to start app after matching on fast forward
-  void ffStartApp() {
-    if (!(fileService.loading || fileService.matching)) {
-      fileService.removeListener(ffStartApp);
-      runApp(
-        App(fileService: fileService),
-      );
-    }
-  }
-
-  if (inputFileName != null && fastForwardMatch) {
-    fileService.addListener(ffStartApp);
-  } else {
-    runApp(
-      App(fileService: fileService),
-    );
-  }
+  runApp(
+    App(service: service),
+  );
 }
 
 class App extends StatelessWidget {
-  /// service to handle input files
-  final InputFileService fileService;
+  /// service to handle input files and match the data
+  final MatchService service;
 
   const App({
     super.key,
-    required this.fileService,
+    required this.service,
   });
 
   @override
   Widget build(BuildContext context) => ToastificationWrapper(
         config: const ToastificationConfig(
-          alignment: Alignment.topLeft,
+          alignment: Alignment.topRight,
         ),
         child: MaterialApp(
           title: "Belegium Matcher",
@@ -76,16 +68,9 @@ class App extends StatelessWidget {
             useMaterial3: true,
           ),
           debugShowCheckedModeBanner: false,
-          initialRoute: fileService.error != null
-              ? "/error"
-              : fileService.results.isNotEmpty
-                  ? "/results"
-                  : "/input",
-          routes: {
-            "/input": (_) => InputScreen(fileService: fileService),
-            "/error": (_) => ErrorScreen(fileService: fileService),
-            "/results": (_) => ResultsScreen(fileService: fileService),
-          },
+          home: FlowScreen(
+            service: service,
+          ),
         ),
       );
 }

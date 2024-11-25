@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 
 class AssignmentWidget extends StatelessWidget {
-  /// name of the wg
-  final String wg;
-
   /// name of the person
-  final String person;
+  final String a;
 
-  /// score of the wg
-  final int wgScore;
+  /// name of the wg
+  final String b;
 
   /// score of the person
-  final int personScore;
+  final int aScore;
+
+  /// score of the wg
+  final int bScore;
 
   const AssignmentWidget({
     super.key,
-    required this.wg,
-    required this.person,
-    required this.wgScore,
-    required this.personScore,
+    required this.b,
+    required this.a,
+    required this.aScore,
+    required this.bScore,
   });
 
   @override
@@ -32,7 +32,7 @@ class AssignmentWidget extends StatelessWidget {
                 "",
                 style: Theme.of(context).textTheme.labelSmall,
               ),
-              Text(person),
+              Text(a),
             ],
           ),
           SizedBox(width: 4),
@@ -40,7 +40,7 @@ class AssignmentWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "$personScore/$wgScore",
+                "$aScore/$bScore",
                 style: Theme.of(context).textTheme.labelSmall,
               ),
               Icon(Icons.compare_arrows),
@@ -54,7 +54,7 @@ class AssignmentWidget extends StatelessWidget {
                 "",
                 style: Theme.of(context).textTheme.labelSmall,
               ),
-              Text(wg),
+              Text(b),
             ],
           ),
         ],
