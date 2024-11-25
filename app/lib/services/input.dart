@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:file_picker/file_picker.dart';
@@ -64,11 +63,12 @@ class InputFileService extends ChangeNotifier {
   }
 
   /// internal storage for merge strategies of matrices
-  final List<int Function(int, int)> _combinationFunctions = [
-    (a, b) => a + b,
-    (a, b) => a * b,
-    (a, b) => (a + b - (a - b).abs() / 3).toInt(),
-  ];
+  final Map<String, int Function(int, int)> _combinationFunctions = {
+    "a + b": (a, b) => a + b,
+    "a * b": (a, b) => a * b,
+    "sign(a) * sign(b) * a * b": (a, b) => ((a < 0 || b < 0) ? -1 : 1) * a * b,
+    "a + b - abs(a - b) / 3": (a, b) => (a + b - (a - b).abs() / 3).toInt(),
+  };
 
   /// method to select a file
   Future<Exception?> selectFile() async {
@@ -137,20 +137,27 @@ class InputFileService extends ChangeNotifier {
       }
     }
 
+    // make matrices quadratic
+    if (!wgMatrix!.dimension.isQuadratic) {
+      wgMatrix = wgMatrix!.quadratic(-100);
+    }
+
+    if (!personMatrix!.dimension.isQuadratic) {
+      personMatrix = personMatrix!.quadratic(-100);
+    }
+
     // perform match
-    for (var fkt in _combinationFunctions) {
+    for (var fkt in _combinationFunctions.keys) {
       // define problem
       Matrix<int> problem = _invertProblem(
-        wgMatrix!
-            .combine(
-              personMatrix!.transpose(),
-              fkt,
-            )
-            .quadratic(),
+        wgMatrix!.combine(
+          personMatrix!.transpose(),
+          _combinationFunctions[fkt]!,
+        ),
       );
 
       results.add(
-        _solver.solve(problem),
+        _solver.solve(problem)..problemOperatrionDescription = fkt,
       );
     }
 
@@ -258,20 +265,7 @@ class InputFileService extends ChangeNotifier {
   Matrix<int> _invertProblem(Matrix<int> problem) =>
       Matrix(
         problem.dimension,
-        fillValue: _findMaxValue(problem),
+        fillValue: problem.largestEntry(),
       ) -
       problem;
-
-  /// internal method to determine highest value in a matrix
-  int _findMaxValue(Matrix<int> matrix) {
-    int value = -1 * double.maxFinite.toInt();
-
-    for (int i = 0; i < matrix.dimension.m; i++) {
-      for (int j = 0; j < matrix.dimension.n; j++) {
-        value = max(value, matrix[i][j]);
-      }
-    }
-
-    return value;
-  }
 }

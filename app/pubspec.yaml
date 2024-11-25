@@ -46,6 +46,9 @@ dependencies:
   #  of options and values using GNU and POSIX style options.
   args: ^2.6.0
 
+  # A widget for input quantity.
+  input_quantity: ^2.4.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

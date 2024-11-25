@@ -55,6 +55,7 @@ class App extends StatelessWidget {
           theme: ThemeData(
             colorSchemeSeed: Colors.deepPurple,
             primaryColorDark: Colors.deepPurple.shade700,
+            highlightColor: Colors.amber,
             useMaterial3: true,
           ),
           debugShowCheckedModeBanner: false,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:input_quantity/input_quantity.dart';
 
 import '../../services/input.dart';
-import '../scenes/table.dart';
 
-class InputScreen extends StatelessWidget {
+class InputScreen extends StatefulWidget {
   final InputFileService fileService;
 
   const InputScreen({
@@ -12,21 +12,63 @@ class InputScreen extends StatelessWidget {
   });
 
   @override
+  State<InputScreen> createState() => _InputScreenState();
+}
+
+class _InputScreenState extends State<InputScreen> {
+  // number of rooms per wg
+  final Map<int, int> wgRoomCounts = {};
+
+  @override
   Widget build(BuildContext context) => Scaffold(
         body: Center(
           child: ListenableBuilder(
-            listenable: fileService,
+            listenable: widget.fileService,
             builder: (context, _) => Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (fileService.file != null && fileService.error == null)
+                if (widget.fileService.file != null &&
+                    widget.fileService.error == null)
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Center(
                         child: SingleChildScrollView(
-                          child: TableScene(
-                            table: fileService.file!.table,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "wg room counts",
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
+                              ),
+                              Wrap(
+                                children: [
+                                  for (int i = 0;
+                                      i <
+                                          widget.fileService.file!.wgs
+                                              .toSet()
+                                              .length;
+                                      i++)
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: InputQty.int(
+                                        initVal: 1,
+                                        minVal: 1,
+                                        decoration: QtyDecorationProps(
+                                          leadingWidget: Text(
+                                            widget.fileService.file!.wgs[i],
+                                          ),
+                                          qtyStyle: QtyStyle.btnOnRight,
+                                        ),
+                                        onQtyChanged: (value) => setState(
+                                            () => wgRoomCounts[i] = value),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -41,9 +83,9 @@ class InputScreen extends StatelessWidget {
                         horizontal: 8.0,
                       ),
                       child: ElevatedButton(
-                        onPressed: fileService.loading
+                        onPressed: widget.fileService.loading
                             ? null
-                            : () => fileService.selectFile().then(
+                            : () => widget.fileService.selectFile().then(
                                   (value) {
                                     if (value != null) {
                                       Navigator.maybeOf(context)
@@ -61,20 +103,24 @@ class InputScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (fileService.error == null &&
-                        fileService.personMatrix != null)
+                    if (widget.fileService.error == null &&
+                        widget.fileService.personMatrix != null)
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 16.0,
                           horizontal: 8.0,
                         ),
                         child: ElevatedButton(
-                          onPressed: fileService.matching
+                          onPressed: widget.fileService.matching
                               ? null
-                              : () => fileService.match().then(
+                              : () =>
+                                  widget.fileService.match(wgRoomCounts).then(
                                     (value) {
                                       Navigator.maybeOf(context)
-                                          ?.pushNamed("/results");
+                                          ?.pushNamed("/results")
+                                          .then(
+                                            (_) => widget.fileService.reload(),
+                                          );
                                     },
                                   ),
                           child: Row(

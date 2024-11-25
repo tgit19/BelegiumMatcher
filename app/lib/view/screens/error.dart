@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/input.dart';
-import '../scenes/table.dart';
+import '../widgets/table.dart';
 
 class ErrorScreen extends StatelessWidget {
   final InputFileService fileService;
@@ -29,7 +29,7 @@ class ErrorScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: Center(
                       child: SingleChildScrollView(
-                        child: TableScene(
+                        child: TableWidget(
                           table: fileService.file!.table,
                           highlightPosition: fileService.error?.source,
                           highlightColor: Colors.red,

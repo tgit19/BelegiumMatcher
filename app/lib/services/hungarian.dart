@@ -22,7 +22,7 @@ class HungarianSolver extends AssignmentSolver<int> {
     }
 
     // initialize data
-    matrix = problem;
+    matrix = problem.copy();
     mask = Matrix(problem.dimension);
     rowCover.clear();
     colCover.clear();
@@ -60,7 +60,7 @@ class HungarianSolver extends AssignmentSolver<int> {
       }
     }
 
-    AssignmentResult result = AssignmentResult();
+    AssignmentResult result = AssignmentResult(problem);
 
     for (int i = 0; i < size; i++) {
       for (int j = 0; j < size; j++) {

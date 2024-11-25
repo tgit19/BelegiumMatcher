@@ -1,4 +1,10 @@
+import 'matrix.dart';
+
 class AssignmentResult {
-  int costs = 0;
   final List<MapEntry<int, int>> assignments = [];
+  final Matrix<int>? problem;
+  int costs = 0;
+  String problemOperatrionDescription = "";
+
+  AssignmentResult(this.problem);
 }
