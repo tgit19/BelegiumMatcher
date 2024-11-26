@@ -1,0 +1,66 @@
+name: build_linux_tar_x86_64
+
+on:
+  workflow_dispatch:
+    inputs:
+      app-directory:
+        description: "The directory where the app is located"
+        required: true
+        type: string
+        default: ./app
+      asset-path: 
+        description: "Name of the generated file with its extension"
+        required: false
+        type: string
+        default: result.tar.gz
+
+  workflow_call:
+    inputs:
+      app-directory:
+        description: "The directory where the app is located"
+        required: true
+        type: string
+      asset-path: 
+        description: "Name of the generated file with its extension"
+        required: false
+        type: string
+        default: result.tar.gz
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+      - run: |
+          sudo apt-get update -y
+          sudo apt-get install -y ninja-build libgtk-3-dev
+
+      - name: Get flutter dependencies
+        working-directory: ${{ inputs.app-directory }}
+        run: flutter pub get
+
+      - name: Build linux app
+        working-directory: ${{ inputs.app-directory }}
+        run: flutter build linux
+
+      - name: Create tar.gz archive
+        working-directory: ${{ inputs.app-directory }}
+        run: |
+          cd ./build/linux/x64/release/bundle
+          tar -czvf ../../../../../${{ inputs.asset-path }} *
+
+      - name: Upload tar.gz archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: tar-gz-x86-64-result
+          path: ${{ inputs.app-directory }}/${{ inputs.asset-path }}
+
+    outputs:
+      asset_path: ${{ inputs.asset-path }}
+      asset_content_type: application/gzip
