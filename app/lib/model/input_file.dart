@@ -44,7 +44,7 @@ class InputFile {
     persons.addAll(
       _getNamesFromTableHeader(
         tables.last.first,
-        headerErrorOffset: table.first.length + 2,
+        headerErrorOffset: table.first.length + 1,
       ),
     );
 
@@ -52,12 +52,12 @@ class InputFile {
     _checkTableHeader(
       tables.first,
       persons,
-      headerErrorOffset: table.first.length + 2,
+      headerErrorOffset: table.first.length + 1,
     );
     _checkTableHeader(
       tables.last,
       wgs,
-      tableErrorOffset: table.first.length + 2,
+      tableErrorOffset: table.first.length + 1,
     );
 
     return _parseTables();
@@ -159,7 +159,7 @@ class InputFile {
     String delimiter = _determineDelimiter(content);
 
     // split content into its lines
-    List<String> lines = content.split('\n');
+    List<String> lines = content.replaceAll('\r', '').split('\n');
 
     // clear data of old tables
     table.clear();
