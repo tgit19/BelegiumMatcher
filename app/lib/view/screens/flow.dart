@@ -180,94 +180,104 @@ class _FlowScreenState extends State<FlowScreen> {
                         )
                       : null,
                 ),
-              if (widget.service.activeStep >= 2 && !widget.service.fastForward)
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SectionWidget(
-                      title: "3.a) duplicate A columns",
-                      titleStaus: 2 < widget.service.activeStep
-                          ? const Icon(Icons.done)
-                          : const Icon(Icons.edit),
-                      child: Wrap(
-                        children: [
-                          for (int i = 0;
-                              i < widget.service.file!.wgs.toSet().length;
-                              i++)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: InputQty.int(
-                                initVal: widget.service.matrixRowHeaderMapA[i]!,
-                                minVal: 1,
-                                decoration: QtyDecorationProps(
-                                  leadingWidget: Text(
-                                    widget.service.file!.wgs[i],
-                                  ),
-                                  qtyStyle: QtyStyle.btnOnRight,
-                                ),
-                                onQtyChanged: (value) => widget
-                                    .service.matrixRowHeaderMapA[i] = value,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    SectionWidget(
-                      title: "3.b) duplicate B columns",
-                      titleStaus: 2 < widget.service.activeStep
-                          ? const Icon(Icons.done)
-                          : const Icon(Icons.edit),
-                      child: Wrap(
-                        children: [
-                          for (int i = 0;
-                              i < widget.service.file!.persons.toSet().length;
-                              i++)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: InputQty.int(
-                                initVal: widget.service.matrixRowHeaderMapB[i]!,
-                                minVal: 1,
-                                decoration: QtyDecorationProps(
-                                  leadingWidget: Text(
-                                    widget.service.file!.persons[i],
-                                  ),
-                                  qtyStyle: QtyStyle.btnOnRight,
-                                ),
-                                onQtyChanged: (value) => widget
-                                    .service.matrixRowHeaderMapB[i] = value,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    if (widget.service.activeStep == 2)
-                      Column(
+              if (widget.service.activeStep >= 2)
+                widget.service.fastForward
+                    ? const SectionWidget(
+                        title: "3) duplicate columns",
+                        titleStaus: Icon(Icons.fast_forward),
+                      )
+                    : Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Divider(),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 16.0,
-                              horizontal: 8.0,
-                            ),
-                            child: ElevatedButton(
-                              onPressed: widget.service.running
-                                  ? null
-                                  : widget.service.run,
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.play_arrow),
-                                  SizedBox(width: 6),
-                                  Text("continue"),
-                                ],
-                              ),
+                          SectionWidget(
+                            title: "3.a) duplicate A columns",
+                            titleStaus: 2 < widget.service.activeStep
+                                ? const Icon(Icons.done)
+                                : const Icon(Icons.edit),
+                            child: Wrap(
+                              children: [
+                                for (int i = 0;
+                                    i < widget.service.file!.wgs.toSet().length;
+                                    i++)
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: InputQty.int(
+                                      initVal: widget
+                                          .service.matrixRowHeaderMapA[i]!,
+                                      minVal: 1,
+                                      decoration: QtyDecorationProps(
+                                        leadingWidget: Text(
+                                          widget.service.file!.wgs[i],
+                                        ),
+                                        qtyStyle: QtyStyle.btnOnRight,
+                                      ),
+                                      onQtyChanged: (value) => widget.service
+                                          .matrixRowHeaderMapA[i] = value,
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
+                          SectionWidget(
+                            title: "3.b) duplicate B columns",
+                            titleStaus: 2 < widget.service.activeStep
+                                ? const Icon(Icons.done)
+                                : const Icon(Icons.edit),
+                            child: Wrap(
+                              children: [
+                                for (int i = 0;
+                                    i <
+                                        widget.service.file!.persons
+                                            .toSet()
+                                            .length;
+                                    i++)
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: InputQty.int(
+                                      initVal: widget
+                                          .service.matrixRowHeaderMapB[i]!,
+                                      minVal: 1,
+                                      decoration: QtyDecorationProps(
+                                        leadingWidget: Text(
+                                          widget.service.file!.persons[i],
+                                        ),
+                                        qtyStyle: QtyStyle.btnOnRight,
+                                      ),
+                                      onQtyChanged: (value) => widget.service
+                                          .matrixRowHeaderMapB[i] = value,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          if (widget.service.activeStep == 2)
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Divider(),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16.0,
+                                    horizontal: 8.0,
+                                  ),
+                                  child: ElevatedButton(
+                                    onPressed: widget.service.running
+                                        ? null
+                                        : widget.service.run,
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.play_arrow),
+                                        SizedBox(width: 6),
+                                        Text("continue"),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                         ],
                       ),
-                  ],
-                ),
               if (widget.service.activeStep >= 3)
                 SectionWidget(
                   title: "4) transform data",
