@@ -20,7 +20,7 @@ class InputFile {
   final List<String> persons = [];
 
   /// store details of input errors
-  InputException? error;
+  FormatException? error;
 
   /// constructor for input files
   InputFile(String filepath) : _file = File(filepath);
@@ -35,34 +35,8 @@ class InputFile {
       await _getContent(),
     );
 
-    // get wgs names from the first table
-    wgs.addAll(
-      _getNamesFromTableHeader(tables.first.first),
-    );
-
-    // get person names from the second table
-    persons.addAll(
-      _getNamesFromTableHeader(
-        tables.last.first,
-        headerErrorOffset: table.first.length + 2,
-      ),
-    );
-
-    // sort tables to prevent wrong name order
-    _sortTable(tables.first, wgs, persons);
-    _sortTable(tables.last, persons, wgs);
-
-    // check for errors in table headers
-    _checkTableHeader(
-      tables.first,
-      persons,
-      headerErrorOffset: table.first.length + 2,
-    );
-    _checkTableHeader(
-      tables.last,
-      wgs,
-      tableErrorOffset: table.first.length + 2,
-    );
+    // transform input data and perform validation checks
+    _transformData();
 
     return _parseTables();
   }
@@ -77,30 +51,8 @@ class InputFile {
       _getContentSync(),
     );
 
-    // get wgs names from the first tables
-    wgs.addAll(
-      _getNamesFromTableHeader(tables.first.first),
-    );
-
-    // get person names from the second tables
-    persons.addAll(
-      _getNamesFromTableHeader(
-        tables.last.first,
-        headerErrorOffset: table.first.length,
-      ),
-    );
-
-    // check for errors in table headers
-    _checkTableHeader(
-      tables.first,
-      persons,
-      headerErrorOffset: table.first.length,
-    );
-    _checkTableHeader(
-      tables.last,
-      wgs,
-      tableErrorOffset: table.first.length,
-    );
+    // transform input data and perform validation checks
+    _transformData();
 
     return _parseTables();
   }
@@ -110,6 +62,7 @@ class InputFile {
     tables.clear();
     wgs.clear();
     persons.clear();
+    error = null;
   }
 
   /// internal method to load file content
@@ -264,6 +217,47 @@ class InputFile {
     return stripped;
   }
 
+  /// internal method to transform input data and run some validation checks
+  void _transformData() {
+    // sort tables to prevent wrong name order
+    tables[0] = _sortedTable(
+      tables[0],
+    );
+
+    tables[1] = _sortedTable(
+      tables[1],
+      tableErrorOffset: tables[0].length + 1,
+    );
+
+    // get wgs names from the first table
+    wgs.addAll(
+      _getNamesFromTableHeader(
+        tables[0][0],
+      ),
+    );
+
+    // get person names from the second table
+    persons.addAll(
+      _getNamesFromTableHeader(
+        tables[1][0],
+        headerErrorOffset: tables[0].length + 1,
+      ),
+    );
+
+    // check for errors in table headers
+    _checkTableHeader(
+      tables[0],
+      persons,
+      columnHeaderErrorOffset: tables[0].length + 1,
+    );
+
+    _checkTableHeader(
+      tables[1],
+      wgs,
+      tableErrorOffset: tables[0].length + 1,
+    );
+  }
+
   /// internal method to extract names from header
   /// \throws InputException for name duplicates
   /// \throws InputException if no names found
@@ -309,28 +303,52 @@ class InputFile {
   }
 
   /// internal method to sort [table] dependend on its [rowHeader] and [columnHeader]
-  void _sortTable(
-    MatrixStorage<String> table,
-    List<String> rowHeader,
-    List<String> columnHeader,
-  ) {
-    List<String> currentRowHeader = rowHeader.toList();
-    List<String> currentColumnHeader = columnHeader.toList();
+  MatrixStorage<String> _sortedTable(
+    MatrixStorage<String> table, {
+    int tableErrorOffset = 0,
+  }) {
+    List<String> rowHeader = [];
+
+    for (int i = 1; i < table.length; i++) {
+      // prevent multiple identical names
+      if (table[i]
+              .where(
+                (element) => element == table[i][0],
+              )
+              .length >
+          1) {
+        error = InputException(
+          "Name duplicate found",
+          TablePosition(tableErrorOffset + i + 1, 0),
+        );
+
+        throw error!;
+      }
+
+      rowHeader.add(
+        table[i][0],
+      );
+    }
+
+    List<String> columnHeader = _getNamesFromTableHeader(table[0]);
+
+    List<String> desiredRowHeader = rowHeader.toList();
+    List<String> desiredColumnHeader = columnHeader.toList();
 
     // sort row header
-    rowHeader.sort(
+    desiredRowHeader.sort(
       (a, b) => a.compareTo(b),
     );
 
     // sort column header
-    columnHeader.sort(
+    desiredColumnHeader.sort(
       (a, b) => a.compareTo(b),
     );
 
     // check if rows need to be resorted
     bool rowNeedsSort = false;
     for (int i = 0; i < rowHeader.length; i++) {
-      if (currentRowHeader[i] != rowHeader[i]) {
+      if (rowHeader[i] != desiredRowHeader[i]) {
         rowNeedsSort = true;
         break;
       }
@@ -339,58 +357,72 @@ class InputFile {
     // check if columns need to be resorted
     bool columnNeedsSort = false;
     for (int i = 0; i < columnHeader.length; i++) {
-      if (currentColumnHeader[i] != columnHeader[i]) {
+      if (columnHeader[i] != desiredColumnHeader[i]) {
         columnNeedsSort = true;
         break;
       }
     }
 
     // abort if no resort needed
-    if (!rowNeedsSort && !columnNeedsSort) return;
+    if (!rowNeedsSort && !columnNeedsSort) return table;
 
     // remember size of the table
-    Dimension size = Dimension(table.length, table.first.length);
+    Dimension size = Dimension(table.length, table[0].length);
+    MatrixStorage<String> newTable = [];
 
     // handle header row
-    if (rowNeedsSort) {
-      List<String> newRow = [
-        table[0][0],
-      ];
-
-      for (int j = 0; j < size.n - 1; j++) {
-        newRow.add(
-          table[0][1 + currentColumnHeader.indexOf(columnHeader[j])],
-        );
-      }
-
-      table.add(newRow);
+    if (columnNeedsSort) {
+      newTable.add(
+        _sortedColumn(table, columnHeader, desiredColumnHeader, 0),
+      );
     } else {
-      table.add(table[0]);
+      newTable.add(table[0]);
     }
 
     // handle the rest
-    for (int i = 0; i < size.m - 1; i++) {
+    for (int i = 1; i < size.m; i++) {
       if (columnNeedsSort) {
-        List<String> newRow = [
-          table[i + 1][0],
-        ];
-
-        for (int j = 0; j < size.n - 1; j++) {
-          newRow.add(
-            table[i + 1][1 + currentColumnHeader.indexOf(columnHeader[j])],
-          );
-        }
-
-        table.add(newRow);
+        newTable.add(
+          _sortedColumn(
+            table,
+            columnHeader,
+            desiredColumnHeader,
+            1 + rowHeader.indexOf(desiredRowHeader[i - 1]),
+          ),
+        );
       } else if (rowNeedsSort) {
-        table.add(table[1 + currentRowHeader.indexOf(rowHeader[i])]);
+        newTable.add(
+          table[1 + rowHeader.indexOf(desiredRowHeader[i - 1])],
+        );
       } else {
-        table.add(table[i + 1]);
+        newTable.add(
+          table[i],
+        );
       }
     }
 
-    // remove old data
-    table.removeRange(0, size.m);
+    return newTable;
+  }
+
+  /// internal method to sort columns of [table] based on
+  ///  [columnHeader] vs [desiredColumnHeader] and the [currentRow]
+  List<String> _sortedColumn(
+    MatrixStorage<String> table,
+    List<String> columnHeader,
+    List<String> desiredColumnHeader,
+    int currentRow,
+  ) {
+    List<String> newRow = [
+      table[currentRow][0],
+    ];
+
+    for (int j = 0; j < columnHeader.length; j++) {
+      newRow.add(
+        table[currentRow][1 + columnHeader.indexOf(desiredColumnHeader[j])],
+      );
+    }
+
+    return newRow;
   }
 
   /// internal method to verify if table headers match
@@ -399,42 +431,41 @@ class InputFile {
   /// \throws InputException if wrong ordered
   void _checkTableHeader(
     MatrixStorage<String> table,
-    List<String> header, {
+    List<String> otherRowHeader, {
     int tableErrorOffset = 0,
-    int headerErrorOffset = 0,
+    int columnHeaderErrorOffset = 0,
   }) {
-    if (header.length != table.length - 1) {
+    if (otherRowHeader.length != table.length - 1) {
       error = InputException(
         "Dimension missmatch detected",
-        tableErrorOffset > headerErrorOffset
-            ? TablePosition(null, 0)
-            : TablePosition(headerErrorOffset, null),
-        tableErrorOffset != 0 ? tableErrorOffset : null,
+        tableErrorOffset > columnHeaderErrorOffset
+            ? TablePosition(null, 0, tableErrorOffset)
+            : TablePosition(columnHeaderErrorOffset, null),
       );
 
       throw error!;
     }
 
-    List<String> tableHeader = [];
+    List<String> columnHeader = [];
 
     for (int i = 1; i < table.length; i++) {
-      tableHeader.add(table[i][0]);
+      columnHeader.add(table[i][0]);
     }
 
-    for (int i = 0; i < header.length; i++) {
-      if (!header.contains(tableHeader[i])) {
-        error = InputException(
+    for (int i = 0; i < otherRowHeader.length; i++) {
+      if (!otherRowHeader.contains(columnHeader[i])) {
+        error = FormatException(
           "Name is missing",
-          TablePosition(tableErrorOffset + i + 1, 0),
+          columnHeader[i],
         );
 
         throw error!;
       }
 
-      if (!tableHeader.contains(header[i])) {
-        error = InputException(
+      if (!columnHeader.contains(otherRowHeader[i])) {
+        error = FormatException(
           "Name is missing",
-          TablePosition(headerErrorOffset, i),
+          otherRowHeader[i],
         );
 
         throw error!;
@@ -444,18 +475,18 @@ class InputFile {
 
   /// internal method to parse loaded tables to matrices
   List<Matrix<int>> _parseTables() => [
-        _parseTable(tables.first),
-        _parseTable(tables.last),
+        _parseTable(tables[0]),
+        _parseTable(tables[1]),
       ];
 
   /// internal method to parse a single table to its matrix
   Matrix<int> _parseTable(MatrixStorage<String> table) {
     Matrix<int> matrix = Matrix<int>(
-      Dimension(table.length - 1, table.first.length - 1),
+      Dimension(table.length - 1, table[0].length - 1),
     );
 
     for (int i = 0; i < table.length - 1; i++) {
-      for (int j = 0; j < table.first.length - 1; j++) {
+      for (int j = 0; j < table[0].length - 1; j++) {
         matrix[i][j] = int.parse(table[i + 1][j + 1]);
       }
     }

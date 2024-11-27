@@ -1,6 +1,7 @@
 class TablePosition {
   final int? row;
   final int? column;
+  final int? rowOffset;
 
   /// constructor of a position
   /// positions can be
@@ -9,9 +10,11 @@ class TablePosition {
   ///  - a cell
   const TablePosition(
     this.row,
-    this.column,
-  ) : assert(row != null || column != null);
+    this.column, [
+    this.rowOffset,
+  ]) : assert(row != null || column != null);
 
   @override
-  String toString() => "TablePosition(row: $row, column: $column)";
+  String toString() =>
+      "TablePosition(row: $row (+$rowOffset), column: $column)";
 }
