@@ -53,7 +53,11 @@ class _FlowScreenState extends State<FlowScreen> {
 
   void listener() {
     setState(() {});
-    scrollToWidget(scrollKey);
+
+    // dont scroll on error, not before step 2 is done
+    if (widget.service.file?.error == null && widget.service.activeStep > 1) {
+      scrollToWidget(scrollKey);
+    }
   }
 
   @override
@@ -70,11 +74,12 @@ class _FlowScreenState extends State<FlowScreen> {
             children: [
               SectionWidget(
                 title: "1) select file",
-                titleStaus: widget.service.activeStep == 0
-                    ? const Icon(Icons.file_open_outlined)
-                    : 0 < widget.service.activeStep
-                        ? const Icon(Icons.done)
-                        : const CircularProgressIndicator(),
+                titleStaus:
+                    widget.service.activeStep == 0 && !widget.service.running
+                        ? const Icon(Icons.file_open_outlined)
+                        : 0 < widget.service.activeStep
+                            ? const Icon(Icons.done)
+                            : const CircularProgressIndicator(),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +144,8 @@ class _FlowScreenState extends State<FlowScreen> {
                       ? Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (widget.service.file!.error != null)
+                            if (widget.service.file!.error != null ||
+                                widget.service.tables?.length != 2)
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: TableWidget(
@@ -150,14 +156,16 @@ class _FlowScreenState extends State<FlowScreen> {
                                       : null,
                                 ),
                               ),
-                            if (widget.service.file!.error == null)
+                            if (widget.service.file!.error == null &&
+                                widget.service.tables?.length == 2)
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: TableWidget(
                                   table: widget.service.file!.tables[0],
                                 ),
                               ),
-                            if (widget.service.file!.error == null)
+                            if (widget.service.file!.error == null &&
+                                widget.service.tables?.length == 2)
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: TableWidget(
