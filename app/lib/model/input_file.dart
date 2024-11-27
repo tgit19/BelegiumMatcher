@@ -35,29 +35,33 @@ class InputFile {
       await _getContent(),
     );
 
-    // get wgs names from the first tables
+    // get wgs names from the first table
     wgs.addAll(
       _getNamesFromTableHeader(tables.first.first),
     );
 
-    // get person names from the second tables
+    // get person names from the second table
     persons.addAll(
       _getNamesFromTableHeader(
         tables.last.first,
-        headerErrorOffset: table.first.length + 1,
+        headerErrorOffset: table.first.length + 2,
       ),
     );
+
+    // sort tables to prevent wrong name order
+    _sortTable(tables.first, wgs, persons);
+    _sortTable(tables.last, persons, wgs);
 
     // check for errors in table headers
     _checkTableHeader(
       tables.first,
       persons,
-      headerErrorOffset: table.first.length + 1,
+      headerErrorOffset: table.first.length + 2,
     );
     _checkTableHeader(
       tables.last,
       wgs,
-      tableErrorOffset: table.first.length + 1,
+      tableErrorOffset: table.first.length + 2,
     );
 
     return _parseTables();
@@ -304,6 +308,91 @@ class InputFile {
     return names;
   }
 
+  /// internal method to sort [table] dependend on its [rowHeader] and [columnHeader]
+  void _sortTable(
+    MatrixStorage<String> table,
+    List<String> rowHeader,
+    List<String> columnHeader,
+  ) {
+    List<String> currentRowHeader = rowHeader.toList();
+    List<String> currentColumnHeader = columnHeader.toList();
+
+    // sort row header
+    rowHeader.sort(
+      (a, b) => a.compareTo(b),
+    );
+
+    // sort column header
+    columnHeader.sort(
+      (a, b) => a.compareTo(b),
+    );
+
+    // check if rows need to be resorted
+    bool rowNeedsSort = false;
+    for (int i = 0; i < rowHeader.length; i++) {
+      if (currentRowHeader[i] != rowHeader[i]) {
+        rowNeedsSort = true;
+        break;
+      }
+    }
+
+    // check if columns need to be resorted
+    bool columnNeedsSort = false;
+    for (int i = 0; i < columnHeader.length; i++) {
+      if (currentColumnHeader[i] != columnHeader[i]) {
+        columnNeedsSort = true;
+        break;
+      }
+    }
+
+    // abort if no resort needed
+    if (!rowNeedsSort && !columnNeedsSort) return;
+
+    // remember size of the table
+    Dimension size = Dimension(table.length, table.first.length);
+
+    // handle header row
+    if (rowNeedsSort) {
+      List<String> newRow = [
+        table[0][0],
+      ];
+
+      for (int j = 0; j < size.n - 1; j++) {
+        newRow.add(
+          table[0][1 + currentColumnHeader.indexOf(columnHeader[j])],
+        );
+      }
+
+      table.add(newRow);
+    } else {
+      table.add(table[0]);
+    }
+
+    // handle the rest
+    for (int i = 0; i < size.m - 1; i++) {
+      if (columnNeedsSort) {
+        List<String> newRow = [
+          table[i + 1][0],
+        ];
+
+        for (int j = 0; j < size.n - 1; j++) {
+          newRow.add(
+            table[i + 1][1 + currentColumnHeader.indexOf(columnHeader[j])],
+          );
+        }
+
+        table.add(newRow);
+      } else if (rowNeedsSort) {
+        table.add(table[1 + currentRowHeader.indexOf(rowHeader[i])]);
+      } else {
+        table.add(table[i + 1]);
+      }
+    }
+
+    // remove old data
+    table.removeRange(0, size.m);
+  }
+
   /// internal method to verify if table headers match
   /// \throws InputException if dimensions dont match
   /// \throws InputException if name is missing
@@ -346,17 +435,6 @@ class InputFile {
         error = InputException(
           "Name is missing",
           TablePosition(headerErrorOffset, i),
-        );
-
-        throw error!;
-      }
-
-      if (header[i] != tableHeader[i]) {
-        error = InputException(
-          "Wrong name order",
-          tableErrorOffset > headerErrorOffset
-              ? TablePosition(tableErrorOffset + i + 1, 0)
-              : TablePosition(headerErrorOffset, i),
         );
 
         throw error!;
