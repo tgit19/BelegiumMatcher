@@ -35,7 +35,7 @@ class AssignmentWidget extends StatelessWidget {
               Text(a),
             ],
           ),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -43,10 +43,10 @@ class AssignmentWidget extends StatelessWidget {
                 "$aScore/$bScore",
                 style: Theme.of(context).textTheme.labelSmall,
               ),
-              Icon(Icons.compare_arrows),
+              const Icon(Icons.compare_arrows),
             ],
           ),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [

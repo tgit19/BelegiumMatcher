@@ -71,10 +71,10 @@ class _FlowScreenState extends State<FlowScreen> {
               SectionWidget(
                 title: "1) select file",
                 titleStaus: widget.service.activeStep == 0
-                    ? Icon(Icons.file_open_outlined)
+                    ? const Icon(Icons.file_open_outlined)
                     : 0 < widget.service.activeStep
-                        ? Icon(Icons.done)
-                        : CircularProgressIndicator(),
+                        ? const Icon(Icons.done)
+                        : const CircularProgressIndicator(),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +91,7 @@ class _FlowScreenState extends State<FlowScreen> {
                             onPressed: widget.service.running
                                 ? null
                                 : () => widget.service.run(0),
-                            child: Row(
+                            child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(Icons.file_open_outlined),
@@ -111,7 +111,7 @@ class _FlowScreenState extends State<FlowScreen> {
                               onPressed: widget.service.running
                                   ? null
                                   : () => widget.service.run(1),
-                              child: Row(
+                              child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(Icons.cached),
@@ -130,10 +130,10 @@ class _FlowScreenState extends State<FlowScreen> {
                 SectionWidget(
                   title: "2) load file content",
                   titleStaus: widget.service.file?.error != null
-                      ? Icon(Icons.error_outline)
+                      ? const Icon(Icons.error_outline)
                       : 1 < widget.service.activeStep
-                          ? Icon(Icons.done)
-                          : CircularProgressIndicator(),
+                          ? const Icon(Icons.done)
+                          : const CircularProgressIndicator(),
                   child: !widget.service.fastForward ||
                           widget.service.file!.error != null
                       ? Column(
@@ -179,8 +179,8 @@ class _FlowScreenState extends State<FlowScreen> {
                     SectionWidget(
                       title: "3.a) duplicate A columns",
                       titleStaus: 2 < widget.service.activeStep
-                          ? Icon(Icons.done)
-                          : Icon(Icons.edit),
+                          ? const Icon(Icons.done)
+                          : const Icon(Icons.edit),
                       child: Wrap(
                         children: [
                           for (int i = 0;
@@ -207,8 +207,8 @@ class _FlowScreenState extends State<FlowScreen> {
                     SectionWidget(
                       title: "3.b) duplicate B columns",
                       titleStaus: 2 < widget.service.activeStep
-                          ? Icon(Icons.done)
-                          : Icon(Icons.edit),
+                          ? const Icon(Icons.done)
+                          : const Icon(Icons.edit),
                       child: Wrap(
                         children: [
                           for (int i = 0;
@@ -236,7 +236,7 @@ class _FlowScreenState extends State<FlowScreen> {
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Divider(),
+                          const Divider(),
                           Padding(
                             padding: const EdgeInsets.symmetric(
                               vertical: 16.0,
@@ -246,7 +246,7 @@ class _FlowScreenState extends State<FlowScreen> {
                               onPressed: widget.service.running
                                   ? null
                                   : widget.service.run,
-                              child: Row(
+                              child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(Icons.play_arrow),
@@ -264,8 +264,8 @@ class _FlowScreenState extends State<FlowScreen> {
                 SectionWidget(
                   title: "4) transform data",
                   titleStaus: 3 < widget.service.activeStep
-                      ? Icon(Icons.done)
-                      : CircularProgressIndicator(),
+                      ? const Icon(Icons.done)
+                      : const CircularProgressIndicator(),
                   child: widget.showMatrices
                       ? Wrap(
                           crossAxisAlignment: WrapCrossAlignment.center,
@@ -276,16 +276,16 @@ class _FlowScreenState extends State<FlowScreen> {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text("A = "),
+                                const Text("A = "),
                                 MatrixWidget(widget.service.matrixA!),
                               ],
                             ),
-                            Text(','),
-                            SizedBox(width: 6),
+                            const Text(','),
+                            const SizedBox(width: 6),
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text("B = "),
+                                const Text("B = "),
                                 MatrixWidget(widget.service.matrixB!),
                               ],
                             ),
@@ -335,7 +335,7 @@ class _FlowScreenState extends State<FlowScreen> {
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text("M = "),
+                                              const Text("M = "),
                                               MatrixWidget(
                                                 widget.service.problems[i].key,
                                                 highlightPoints: widget
@@ -354,7 +354,7 @@ class _FlowScreenState extends State<FlowScreen> {
                                                     mainAxisSize:
                                                         MainAxisSize.min,
                                                     children: [
-                                                      Row(
+                                                      const Row(
                                                         mainAxisSize:
                                                             MainAxisSize.min,
                                                         children: [
@@ -375,7 +375,7 @@ class _FlowScreenState extends State<FlowScreen> {
                                                   ),
                                                 ),
                                               ),
-                                              Text("W = "),
+                                              const Text("W = "),
                                               MatrixWidget(
                                                 widget
                                                     .service.problems[i].value,
@@ -427,7 +427,8 @@ class _FlowScreenState extends State<FlowScreen> {
                                                         BorderRadius.circular(
                                                             10),
                                                   ),
-                                                  padding: EdgeInsets.all(8.0),
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
                                                   child: AssignmentWidget(
                                                     a: widget.service
                                                             .matrixRowHeaderB[
