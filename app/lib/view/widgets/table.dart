@@ -38,6 +38,7 @@ class TableWidget extends StatelessWidget {
                     color: (highlightPosition?.row == i &&
                                 highlightPosition?.column == null) ||
                             (highlightPosition?.row == null &&
+                                (highlightPosition?.rowOffset ?? 0) <= i &&
                                 highlightPosition?.column == j) ||
                             (highlightPosition?.row == i &&
                                 highlightPosition?.column == j)

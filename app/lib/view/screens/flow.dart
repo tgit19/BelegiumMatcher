@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:input_quantity/input_quantity.dart';
 
 import '../../constants.dart';
+import '../../model/table_position.dart';
 import '../../services/match.dart';
 import '../widgets/assignment.dart';
 import '../widgets/matrix.dart';
@@ -133,20 +134,43 @@ class _FlowScreenState extends State<FlowScreen> {
                       : 1 < widget.service.activeStep
                           ? Icon(Icons.done)
                           : CircularProgressIndicator(),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (widget.service.file?.table.isNotEmpty ?? false)
-                        TableWidget(
-                          table: widget.service.file!.table,
-                          highlightPosition: widget.service.file!.error?.source,
-                        ),
-                      if (widget.service.file!.error != null)
-                        Text(
-                          widget.service.file!.error.toString(),
-                        ),
-                    ],
-                  ),
+                  child: !widget.service.fastForward ||
+                          widget.service.file!.error != null
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (widget.service.file!.error != null)
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TableWidget(
+                                  table: widget.service.file!.table,
+                                  highlightPosition: widget.service.file!.error
+                                          ?.source is TablePosition
+                                      ? widget.service.file!.error?.source
+                                      : null,
+                                ),
+                              ),
+                            if (widget.service.file!.error == null)
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TableWidget(
+                                  table: widget.service.file!.tables[0],
+                                ),
+                              ),
+                            if (widget.service.file!.error == null)
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TableWidget(
+                                  table: widget.service.file!.tables[1],
+                                ),
+                              ),
+                            if (widget.service.file!.error != null)
+                              Text(
+                                widget.service.file!.error.toString(),
+                              ),
+                          ],
+                        )
+                      : null,
                 ),
               if (widget.service.activeStep >= 2 && !widget.service.fastForward)
                 Column(
