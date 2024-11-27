@@ -26,7 +26,7 @@ class MatrixWidget extends StatelessWidget {
 
     return Container(
       width: fontSize * maxChars * (matrix.dimension.m + 1),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
           left: BorderSide(color: Colors.black, width: 2),
           right: BorderSide(color: Colors.black, width: 2),

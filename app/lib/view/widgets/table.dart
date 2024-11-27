@@ -51,7 +51,8 @@ class TableWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                for (int j = table[i].length; j < tableWidth(); j++) SizedBox(),
+                for (int j = table[i].length; j < tableWidth(); j++)
+                  const SizedBox(),
               ],
             ),
         ],

@@ -21,7 +21,7 @@ class SectionWidget extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Divider(),
+          const Divider(),
           ListTile(
             title: Text(
               title,
