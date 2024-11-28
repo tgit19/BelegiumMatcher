@@ -1,8 +1,5 @@
-/bin-int
-/.vs
-*.sln
-*.vcxproj*
-.vscode
+# Cpp project
 /tests/BelegiumTest.xlsx
 /tests/BelegiumTest.csv
 /tests/BelegiumTest-long.csv
+.vscode/

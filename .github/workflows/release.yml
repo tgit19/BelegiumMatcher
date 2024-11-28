@@ -1,0 +1,115 @@
+name: Release Draft
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  pubspec:
+    # run only of PR got merged successfully
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    outputs:
+      name: ${{ steps.get_name.outputs.name }}
+      version: ${{ steps.get_version.outputs.version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get app name from pubspec.yaml
+        id: get_name
+        working-directory: ./app
+        run: |
+          NAME=$(sed -n 's/^name: //p' pubspec.yaml)
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+
+      - name: Get app version from pubspec.yaml
+        id: get_version
+        working-directory: ./app
+        run: |
+          VERSION=$(sed -n 's/^version: \([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' pubspec.yaml)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      
+  linux_tar:
+    needs:
+      - pubspec
+    uses: ./.github/workflows/build_linux_tar.yml
+    with:
+      app-directory: ./app
+
+  windows_zip:
+    needs:
+      - pubspec
+    uses: ./.github/workflows/build_windows_zip.yml
+    with:
+      app-directory: ./app
+
+  release:
+    needs:
+      - pubspec
+      - linux_tar
+      - windows_zip
+    runs-on: ubuntu-latest
+    permissions:
+      # write permission is required to create a github release
+      contents: write
+      # write permission is required for autolabeler
+      # otherwise, read permission is required at least
+      pull-requests: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Draft release
+        id: draft_release
+        uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag: v${{ needs.pubspec.outputs.version }}
+          name: v${{ needs.pubspec.outputs.version }}
+
+      # LINUX TAR.GZ (x86_64)
+      - name: Download linux tar.gz file
+        uses: actions/download-artifact@v4
+        with:
+          name: tar-gz-x86-64-result
+          path: tar-gz-x86-64-result
+
+      - name: Copy tar.gz file to root
+        run: cp tar-gz-x86-64-result/*.tar.gz result.tar.gz
+
+      - name: Upload Release Asset (tar.gz)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.draft_release.outputs.upload_url }}
+          asset_path: result.tar.gz
+          asset_name: ${{ needs.pubspec.outputs.name }}-${{ needs.pubspec.outputs.version }}-linux-x86-64.tar.gz
+          asset_content_type: application/gzip
+
+      # WINDOWS ZIP (x86_64)
+      - name: Download windows zip file
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-zip-x86-64-result
+          path: windows-zip-x86-64-result
+
+      - name: Copy zip file to root
+        run: cp windows-zip-x86-64-result/*.zip result.zip
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.draft_release.outputs.upload_url }}
+          asset_path: result.zip
+          asset_name: ${{ needs.pubspec.outputs.name }}-${{ needs.pubspec.outputs.version }}-windows-x86-64.zip
+          asset_content_type: application/zip
