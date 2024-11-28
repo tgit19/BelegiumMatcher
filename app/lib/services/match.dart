@@ -78,7 +78,7 @@ class MatchService extends ChangeNotifier {
     bool fastStart = false,
   })  : _file = file,
         _activeStep = file != null ? 1 : 0 {
-    if (fastStart) {
+    if (fastStart || file != null) {
       unawaited(
         run(),
       );
