@@ -16,19 +16,37 @@ The program uses the Hungarian Algorithm which always finds the optimal solution
     | Person2 | 11      | 12      | 7       |
     | Person3 | 8       | 14      | 9       |
 
-    There must be a line without data between the first and second table!
+
+    ```
+    ;Person1;Person2;Person3
+    WG1;6;12;8
+    WG2;8;13;7
+    WG3;10;15;12
+    ;;;
+    ;WG1;WG2;WG3
+    Person1;10;10;8
+    Person2;11;12;7
+    Person3;8;14;9
+    ```
+
+    There must be a row consisting of empty fields between the first and second table!
+
+    More samples in the [tests folder](./tests).
 
 2. Open that file with the executable.
 
-2.a Open a command prompt in the directory of the executable and write: 
+- Open a command prompt in the directory of the executable and write: 
 "
-<executable> <(optional) options...> <name_of_csv_file>
+\<executable> <(optional) options...> <name_of_csv_file>
+"
 where <name_of_csv_file> gets replaced by the name of the csv file
 (it must be in the same directory or insert the relative path to the data)
 e.g. in the base folder of the directory on windows:
 .\Belegium_Matcher.exe --extra 7 .\tests\t2.csv
 
-2.b Open the executable and select your file with the GUI.
+    or
+
+- Open the executable and select your file with the GUI.
 
 3. There are 4 results using different heuristics.
     You see lists of person-WG-pairs with their rating.

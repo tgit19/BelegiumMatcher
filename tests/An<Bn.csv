@@ -1,0 +1,8 @@
+;Person1;Person2
+WG1;6;12
+WG2;8;13
+WG3;10;15
+;;;
+;WG1;WG2;WG3
+Person1;10;10;8
+Person2;11;12;7
