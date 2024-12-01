@@ -197,7 +197,7 @@ class _FlowScreenState extends State<FlowScreen> {
                             child: Wrap(
                               children: [
                                 for (int i = 0;
-                                    i < widget.service.file!.wgs.toSet().length;
+                                    i < widget.service.file!.a.toSet().length;
                                     i++)
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
@@ -207,7 +207,7 @@ class _FlowScreenState extends State<FlowScreen> {
                                       minVal: 1,
                                       decoration: QtyDecorationProps(
                                         leadingWidget: Text(
-                                          widget.service.file!.wgs[i],
+                                          widget.service.file!.a[i],
                                         ),
                                         qtyStyle: QtyStyle.btnOnRight,
                                       ),
@@ -226,10 +226,7 @@ class _FlowScreenState extends State<FlowScreen> {
                             child: Wrap(
                               children: [
                                 for (int i = 0;
-                                    i <
-                                        widget.service.file!.persons
-                                            .toSet()
-                                            .length;
+                                    i < widget.service.file!.b.toSet().length;
                                     i++)
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
@@ -239,7 +236,7 @@ class _FlowScreenState extends State<FlowScreen> {
                                       minVal: 1,
                                       decoration: QtyDecorationProps(
                                         leadingWidget: Text(
-                                          widget.service.file!.persons[i],
+                                          widget.service.file!.b[i],
                                         ),
                                         qtyStyle: QtyStyle.btnOnRight,
                                       ),

@@ -1,0 +1,92 @@
+@startuml process
+|User|
+start
+
+:select file;
+
+|Service|
+
+if (filename.isEmpty) then (true: no file selected)
+    -[#black,dotted]->
+    stop
+else (load file)
+endif
+
+partition InputFile.load {
+
+if (!file.exists) then (true: file not found)
+    -[#red]->
+    end
+endif
+
+:load file content;
+
+if (lineCount < 4) then (true: not enough lines)
+    -[#red]->
+    end
+endif
+
+:determine delimiter;
+note right
+delimiter = semicolonCount > commaCount ? '<b>;</b>' : '<b>,</b>'
+end note
+
+:split tables;
+
+if (empty lines > 1) then (true: multiple empty lines detected)
+    -[#red]->
+    end
+endif
+
+if (emtpy lines == 0) then (true: no empty line detected)
+    -[#red]->
+    end
+endif
+
+:sort tables;
+:extact table headers;
+
+if (header.containsDuplicate) then (true: name duplicate found)
+    -[#red]->
+    end
+endif
+
+:check headers;
+
+if (otherRowHeader.length != table.length - 1) then (true: dimension missmatch detected)
+    -[#red]->
+    end
+endif
+
+if (name not in header or not in tableHeader) then (true: name is missing)
+    -[#red]->
+    end
+endif
+
+:parse tables;
+
+}
+
+if (fast mode disabled) then (true)
+    |User|
+
+    :duplicate columns;
+    :wait for user input;
+endif
+
+|Service|
+
+:process extrema;
+:copy columns;
+:make matrices quadratic;
+
+repeat
+
+:combine matrices;
+:invert problem;
+:solver.solve;
+
+repeat while (more combination functions?)
+
+stop
+@enduml

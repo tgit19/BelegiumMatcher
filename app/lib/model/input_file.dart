@@ -10,19 +10,28 @@ class InputFile {
   /// internal file handle
   final File _file;
 
-  /// content of the file
+  /// content of the file as table
   final MatrixStorage<String> table = [];
 
-  /// loaded tables (wgs, persons)
+  /// loaded tables (A, B)
   final List<MatrixStorage<String>> tables = [];
 
-  final List<String> wgs = [];
-  final List<String> persons = [];
+  /// first line header of A
+  final List<String> a = [];
+
+  /// first line header of B
+  final List<String> b = [];
 
   /// store details of input errors
   FormatException? error;
 
-  /// constructor for input files
+  /// Creates a [InputFile] object.
+  ///
+  /// If [filepath] is a relative path, it will be interpreted relative to the
+  /// current working directory (see [Directory.current]), when used.
+  ///
+  /// If [filepath] is an absolute path, it will be immune to changes to the
+  /// current working directory.
   InputFile(String filepath) : _file = File(filepath);
 
   /// method to load content
@@ -59,9 +68,10 @@ class InputFile {
 
   /// internal metod to clear old data
   void _clear() {
+    table.clear();
     tables.clear();
-    wgs.clear();
-    persons.clear();
+    a.clear();
+    b.clear();
     error = null;
   }
 
@@ -76,20 +86,13 @@ class InputFile {
 
     // get file content
     String content = await _file.readAsString();
-
-    // count the lines
-    int lineCount = RegExp('\n').allMatches(content).length;
-
-    if (lineCount < 4) {
-      throw FormatException("Multiple lines required", content);
-    }
+    _checkLineCount(content);
 
     return content;
   }
 
   /// internal method to load file content
   /// \throws FileSystemException if file doesnt exist
-  /// \throws FormatException on missing lines
   String _getContentSync() {
     // throw error if file doesn't exist
     if (!_file.existsSync()) {
@@ -98,15 +101,20 @@ class InputFile {
 
     // get file content
     String content = _file.readAsStringSync();
+    _checkLineCount(content);
 
+    return content;
+  }
+
+  /// internal method to check if there are enough lines in [content]
+  /// \throws FormatException on missing lines
+  void _checkLineCount(String content) {
     // count the lines
     int lineCount = RegExp('\n').allMatches(content).length;
 
-    if (lineCount < 4) {
-      throw FormatException("Multiple lines required", content);
+    if (lineCount < 5) {
+      throw FormatException("Not enough lines", content);
     }
-
-    return content;
   }
 
   /// internal method to split table into [tables]
@@ -186,7 +194,7 @@ class InputFile {
       table.sublist(0, tableSplitPosition!),
     );
 
-    // add second table withoud the empty line
+    // add second table without the empty line
     tables.add(
       table.sublist(tableSplitPosition + 1, table.length),
     );
@@ -230,14 +238,14 @@ class InputFile {
     );
 
     // get wgs names from the first table
-    wgs.addAll(
+    a.addAll(
       _getNamesFromTableHeader(
         tables[0][0],
       ),
     );
 
     // get person names from the second table
-    persons.addAll(
+    b.addAll(
       _getNamesFromTableHeader(
         tables[1][0],
         headerErrorOffset: tables[0].length + 1,
@@ -247,13 +255,13 @@ class InputFile {
     // check for errors in table headers
     _checkTableHeader(
       tables[0],
-      persons,
+      b,
       columnHeaderErrorOffset: tables[0].length + 1,
     );
 
     _checkTableHeader(
       tables[1],
-      wgs,
+      a,
       tableErrorOffset: tables[0].length + 1,
     );
   }
@@ -287,15 +295,6 @@ class InputFile {
       }
 
       names.add(header[i]);
-    }
-
-    if (names.isEmpty) {
-      error = InputException(
-        "No names found in header",
-        TablePosition(headerErrorOffset, null),
-      );
-
-      throw error!;
     }
 
     // return list of names

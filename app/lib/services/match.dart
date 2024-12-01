@@ -240,14 +240,14 @@ class MatchService extends ChangeNotifier {
       _matrixB = tables?[1].copy();
 
       // initalize header A and its map
-      for (int i = 0; i < _file!.wgs.length; i++) {
-        matrixRowHeaderA.add(_file!.wgs[i]);
+      for (int i = 0; i < _file!.a.length; i++) {
+        matrixRowHeaderA.add(_file!.a[i]);
         matrixRowHeaderMapA[i] = 1;
       }
 
       // initalize header B and its map
-      for (int i = 0; i < _file!.persons.length; i++) {
-        matrixRowHeaderB.add(_file!.persons[i]);
+      for (int i = 0; i < _file!.b.length; i++) {
+        matrixRowHeaderB.add(_file!.b[i]);
         matrixRowHeaderMapB[i] = 1;
       }
     } catch (e) {
